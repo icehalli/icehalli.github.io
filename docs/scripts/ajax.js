@@ -1,6 +1,6 @@
 class _Ajax {
     static get(url, cb) {
-        if(_Global.isMock) {
+        if(_Config.isMock) {
             _AjaxMock.get(url, cb);
             return;
         }
