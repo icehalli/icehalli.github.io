@@ -14,9 +14,12 @@
   </pre>
   <script>
     $(document).ready(function(){
-      setTimeout(function(){
+      // setTimeout(function(){
+        const md = markdownit()
+        const result = md.render($('#data').text());
+        $('#result').html(result);
         $('#data').css('display', 'block');
-      }, 1000);
+      // }, 1000);
     });
   </script>
 </body>
