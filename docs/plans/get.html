@@ -14,11 +14,11 @@
   </pre>
   <script>
     $(document).ready(function(){
-        const md = markdownit();
-        const data = $('#data').text().trim();
-        const result = md.render(data);
-        $('#result').html(result);
-        // $('#data').css('display', 'block');
+        console.log('getting');
+        $.get( "current.md", function( data ) {
+            console.log('success', data);
+            $( "#result" ).html( data );            
+        });
     });
   </script>
 </body>
