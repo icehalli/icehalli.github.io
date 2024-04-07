@@ -13,6 +13,13 @@ class _Ajax {
 
 class _AjaxMock {
     static get(url, cb) {
-        cb('# mock :muscle:');
+        const res = `
+# mock :muscle:
+| a | b |
+| - | - |
+| r1c1 | r1c2 |
+| r2c1 | r2c2 |
+        `;
+        cb(res);
     }
 }
