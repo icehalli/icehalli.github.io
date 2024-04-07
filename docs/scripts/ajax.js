@@ -13,6 +13,6 @@ class _Ajax {
 
 class _AjaxMock {
     static get(url, cb) {
-        cb('# mock');
+        cb('# mock :muscle:');
     }
 }
