@@ -4,6 +4,8 @@
 <title>Page Title</title>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js" integrity="sha512-ohlWmsCxOu0bph1om5eDL0jm/83eH09fvqLDhiEdiqfDeJbEvz4FSbeY0gLJSVJwQAp0laRhTXbUQG+ZUuifUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="../scripts/ajax.js"></script>
+<script src="../scripts/md.js"></script>
 </head>
 <body>
   plans
@@ -14,10 +16,14 @@
   </pre>
   <script>
     $(document).ready(function(){
-        const md = markdownit();
-        const data = $('#data').text().trim();
-        const result = md.render(data);
-        $('#result').html(result);
+        _Ajax.get('current.md', function(d){
+          const result = _Md.render(d);
+          $('#result').html(result);
+        });
+        // const md = markdownit();
+        // const data = $('#data').text().trim();
+        // const result = md.render(data);
+        // $('#result').html(result);
         // $('#data').css('display', 'block');
     });
   </script>
