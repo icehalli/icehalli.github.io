@@ -24,7 +24,7 @@ class _Url {
         const parts = uriObject.pathname.split('/');
         const last = parts[parts.length -1];
         if(last === '' || last === 'index.html')
-            return parts[parts.length - 2] - 'index'; //folder        
+            return parts[parts.length - 2] + ' - index'; //folder        
         const res = last.split('.')[0];
         return res;     
     }
