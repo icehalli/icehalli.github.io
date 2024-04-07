@@ -1,30 +1,30 @@
 # Mánudagur
 |   |   |
 |----|----|
-| 17 |  æfa  |
-| 18 |  elda  |
-| 20 |  hár og skegg  |
+| 17 |  :muscle: :running:  |
+| 18 |  :fork_and_knife:  |
+| 20 |  :haircut:  |
 
 # Þriðjudagur
 |   |   |
 |----|----|
-| 6  |  skrifstofa  |
-| 17 |  æfa  |
-| 18 |  elda  |
-| 20 |  nef, eyru, neglur  |
+| 6  |  :computer:  |
+| 17 |  :muscle: :running:  |
+| 18 |  :fork_and_knife:  |
+| 20 |  :feet: :hand: :nose: :ear:  |
 
 # Miðvikudagur
 |   |   |
 |----|----|
-| 6  |  skrifstofa  |
-| 11 |  fótbolti  |
+| 6  |  :computer:  |
+| 11 |  :soccer:  |
 
 # Fimmtudagur
 |   |   |
 |----|----|
-| 17 |  æfa  |
-| 18 |  elda  |
-| 20 |  hár og skegg  |
+| 17 |  :muscle: :running:  |
+| 18 |  :fork_and_knife:  |
+| 20 |  :haircut:  |
 
 # Föstudagur
 |   |   |

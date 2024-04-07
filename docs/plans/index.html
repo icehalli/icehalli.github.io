@@ -12,20 +12,12 @@
   plans
   <div id="result">
   </div>
-  <pre id="data" style="display:none">
-    none
-  </pre>
   <script>
     $(document).ready(function(){
         _Ajax.get('current.md', function(d){
           const result = _Md.render(d);
           $('#result').html(result);
         });
-        // const md = markdownit();
-        // const data = $('#data').text().trim();
-        // const result = md.render(data);
-        // $('#result').html(result);
-        // $('#data').css('display', 'block');
     });
   </script>
 </body>
