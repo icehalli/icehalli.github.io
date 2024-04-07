@@ -14,12 +14,11 @@
   </pre>
   <script>
     $(document).ready(function(){
-      // setTimeout(function(){
-        const md = markdownit()
-        const result = md.render($('#data').text());
+        const md = markdownit();
+        const data = $('#data').text().trim();
+        const result = md.render(data);
         $('#result').html(result);
-        $('#data').css('display', 'block');
-      // }, 1000);
+        // $('#data').css('display', 'block');
     });
   </script>
 </body>
