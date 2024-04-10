@@ -20,25 +20,10 @@
 <script src="../scripts/ajax.js"></script>
 <script src="../scripts/md.js"></script><script>
     $(document).ready(function(){        
-        $.get( "nav.json", function( data ) {
-        $('#content').html(_Nav.get(data));      
+        _Ajax.get( "nav.json", function( data ) {
+            $('#content').html(_Nav.get(data));      
         });
     });
-
-    function getNav(){
-        return {
-            lis: [
-                {
-                    label:'test',
-                    url: 'x.html'
-                },
-                {
-                    label:'test',
-                    url: 'x.html'
-                }
-            ]
-        }
-    }
   </script>
 </body>
 </html>
