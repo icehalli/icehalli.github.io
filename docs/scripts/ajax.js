@@ -6,7 +6,6 @@ class _Ajax {
             this.get(_Config.folder + '/' + url);
     }
     static get(url, cb) {
-        console.log("ajax", _Config.isMock);
         if(_Config.isMock) {
             _AjaxMock.get(url, cb);
             return;
@@ -116,7 +115,6 @@ class _AjaxMock {
     static get(url, cb) {
         if(!this.mocksReady)
             this.setupMock();
-        console.log('get', url);
         if(!this.mocks[_Config.folder])
             cb('# folder not found ' + _Config.folder);
         else if(!this.mocks[_Config.folder][url])
