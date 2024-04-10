@@ -1,4 +1,10 @@
 class _Ajax {
+    static getInFolder(url, cb) {
+        if(_Config.isMock)
+            this.get(url,cb);
+        else
+            this.get(_Config.folder + '/' + url);
+    }
     static get(url, cb) {
         console.log("ajax", _Config.isMock);
         if(_Config.isMock) {
@@ -14,6 +20,16 @@ class _Ajax {
 
 class _AjaxMock {
     static mocks = {
+        "plans": {
+        "current.md": `
+# mock :muscle:
+| a | b |
+| - | - |
+| r1c1 | r1c2 |
+| r2c1 | r2c2 |
+        `
+        },
+        "templates": {
         "current.md": `
 # mock :muscle:
 | a | b |
@@ -21,10 +37,11 @@ class _AjaxMock {
 | r1c1 | r1c2 |
 | r2c1 | r2c2 |
         `,
-        "templates/nav.json": {
+        "nav.json": {
+            "header": "Template",
             "lis": [
                 {
-                    "label":"test2",
+                    "label":"test3",
                     "url": "x.html"
                 },
                 {
@@ -33,12 +50,13 @@ class _AjaxMock {
                 }
             ]
         }
+    }
     };
 
     static get(url, cb) {
 
         console.log('get', url);
-        const res = this.mocks[_Config.folder+'/'+url];
+        const res = this.mocks[_Config.folder][url];
         cb(res);
     }
 }

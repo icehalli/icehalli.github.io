@@ -1,27 +1,6 @@
 class _Nav {
-    static a(o) {
-        const a = new _Template('a');
-        a.classes('nav-link active');
-        a.addProp(`aria-current="page"`);
-        return li.getJQ();
-    }
-
-    static navbar() {
-        const navbar = new _Template('nav');
-        navbar.id('navbar');
-        navbar.classes('navbar navbar-expand-lg navbar-light bg-light');
-        return navbar;
-    }
-
-    static li(o){        
-        const li = new _Template('li');
-        li.classes('nav-item');
-        return li.getJQ();
-
-        return `
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="${o.href}">${o.label}</a>
-        </li>`;
+    static getHeader(obj) {
+      return `<h1>${obj.header}</h1>`;
     }
     static getLis(obj) {
       console.log('getlis', obj);
