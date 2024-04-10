@@ -1,0 +1,13 @@
+{
+    "header": "Something",
+    "lis": [
+        {
+            "label":"index",
+            "url": "current.md"
+        },
+        {
+            "label":"Current",
+            "url": "current.md"
+        }
+    ]
+}

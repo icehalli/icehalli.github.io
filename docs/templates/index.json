@@ -3,11 +3,11 @@
     "lis": [
         {
             "label":"test2",
-            "url": "x.html"
+            "url": "index.html"
         },
         {
             "label":"test",
-            "url": "x.html"
+            "url": "current.md"
         }
     ]
 }

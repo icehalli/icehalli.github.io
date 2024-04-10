@@ -2,7 +2,7 @@
     "header": "Home",
     "lis": [
         {
-            "label":"Ðlans",
+            "label":"Plans",
             "url": "plans"
         },
         {
@@ -11,7 +11,7 @@
         },
         {
             "label":"Templates",
-            "url": "templates"
+            "url": "templates/index.html"
         }
     ]
 }
