@@ -2,13 +2,14 @@ class _Nav {
     static getHeader(obj) {
       return `<h1>${obj.header}</h1>`;
     }
-    
+
     static getLis(obj) {
       console.log('getlis', obj);
       var res = '';
       for(var o of obj) {
         console.log('getlis:o', o);
         let url = o.url;
+        let classname = '';
         if(url.indexOf('.md') > -1){
           url = "#";
           classname = " md-file";

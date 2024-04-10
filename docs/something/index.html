@@ -28,6 +28,13 @@
           const result = _Md.render(d);
           $('#content').html(result);
           $('table').addClass('table').addClass('table-striped');
+          $('.md-file').on('click', function(){
+            var url = $(this).attr('data-url');
+            _Ajax.get(url, function(d){
+              const result = _Md.render(d);
+              $('#content').html(result);
+            });
+          });
         });
     });
   </script>
