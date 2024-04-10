@@ -1,0 +1,13 @@
+{
+    "header": "Something",
+    "lis": [
+        {
+            "label":"index",
+            "url": "index.html"
+        },
+        {
+            "label":"something",
+            "url": "something.md"
+        }
+    ]
+}

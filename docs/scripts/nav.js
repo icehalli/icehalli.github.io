@@ -2,14 +2,20 @@ class _Nav {
     static getHeader(obj) {
       return `<h1>${obj.header}</h1>`;
     }
+    
     static getLis(obj) {
       console.log('getlis', obj);
       var res = '';
       for(var o of obj) {
         console.log('getlis:o', o);
+        let url = o.url;
+        if(url.indexOf('.md') > -1){
+          url = "#";
+          classname = " md-file";
+        }
         res += `        
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="${o.url}">${o.label}</a>
+          <a class="nav-link active ${classname}" data-url="${o.url}" aria-current="page" href="${url}">${o.label}</a>
         </li>
         `;
       }
