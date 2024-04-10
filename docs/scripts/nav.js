@@ -23,7 +23,21 @@ class _Nav {
           <a class="nav-link active" aria-current="page" href="${o.href}">${o.label}</a>
         </li>`;
     }
-    static get() {
+    static getLis(obj) {
+      console.log('getlis', obj);
+      var res = '';
+      for(var o of obj) {
+        console.log('getlis:o', o);
+        res += `        
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="${o.url}">${o.label}</a>
+        </li>
+        `;
+      }
+      return res;
+    }
+    static get(obj) {
+      console.log('get');
         return `
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
@@ -33,18 +47,7 @@ class _Nav {
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Features</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Pricing</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-        </li>
+        ${this.getLis(obj.lis)}
       </ul>
     </div>
   </div>
