@@ -20,11 +20,11 @@
 <script src="../scripts/ajax.js"></script>
 <script src="../scripts/md.js"></script><script>
     $(document).ready(function(){
-        _Ajax.get("nav.json", function( data ) {
+        _Ajax.get("index.json", function( data ) {
             $('#header').html(_Nav.getHeader(data));
             $('#nav').html(_Nav.get(data));      
         });
-        _Ajax.get('current.md', function(d){
+        _Ajax.get('index.md', function(d){
           const result = _Md.render(d);
           $('#content').html(result);
           $('table').addClass('table').addClass('table-striped');
