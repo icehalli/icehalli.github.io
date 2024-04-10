@@ -1,0 +1,17 @@
+{
+    "header": "Home",
+    "lis": [
+        {
+            "label":"Ðlans",
+            "url": "plans"
+        },
+        {
+            "label":"Something",
+            "url": "something"
+        },
+        {
+            "label":"Templates",
+            "url": "templates"
+        }
+    ]
+}

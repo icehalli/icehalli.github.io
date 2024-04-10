@@ -48,4 +48,33 @@ class _Utils {
     }
 }
 
+class _Page {
+    static setup(){
+        var nav = $('<div>').attr('id', 'nav');
+        var header = $('<div>').attr('id', 'header');
+        var content = $('<div>').attr('id', 'content');
+        $('body').append(nav);
+        $('body').append(header);
+        $('body').append(content);
+
+        _Ajax.get("index.json", function( data ) {
+            $('#header').html(_Nav.getHeader(data));
+            $('#nav').html(_Nav.get(data));      
+        });
+        _Ajax.get('index.md', function(d){
+          const result = _Md.render(d);
+          $('#content').html(result);
+          $('table').addClass('table').addClass('table-striped');
+          $('.md-file').on('click', function(){
+            var url = $(this).attr('data-url');
+            _Ajax.get(url, function(d){
+              const result = _Md.render(d);
+              $('#content').html(result);
+            });
+          });
+        });
+
+    }
+}
+
 _Global.initialize();
