@@ -2,12 +2,12 @@
     "header": "Template",
     "lis": [
         {
-            "label":"test2",
+            "label":"Index",
             "url": "index.html"
         },
         {
-            "label":"test",
-            "url": "current.md"
+            "label":"Tab1",
+            "url": "tab1.md"
         }
     ]
 }

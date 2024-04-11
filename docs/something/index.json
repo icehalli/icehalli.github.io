@@ -8,6 +8,10 @@
         {
             "label":"something",
             "url": "something.md"
+        },
+        {
+            "label":"to another folder",
+            "url": "../templates"
         }
     ]
 }
