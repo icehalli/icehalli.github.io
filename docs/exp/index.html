@@ -52,7 +52,7 @@
 
     function Root(){
         let r = new URL(window.location.href);
-        return r.protocol + '://' + r.host + '/' + r.pathname.split('/')[1] + '/'
+        return r.protocol + '//' + r.host + '/' + r.pathname.split('/')[1] + '/'
         // https://icehalli.github.io/docs/something/
     }
   </script>
