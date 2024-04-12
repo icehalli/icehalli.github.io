@@ -1,4 +1,24 @@
 class _Nav {
+    static getCrumbs(obj) {
+      var res = '';
+      for(var o of obj) {
+        let active = ''        
+        if(o.active)
+          active = ' active';
+        res += `        
+        <li class="breadcrumb-item${active}" aria-current="page">${o.label}</li>
+        `;
+      }
+      return res;
+    }
+    static getBreadCrumbs(obj) {
+      return `<nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        ${this.getCrumbs(obj)}
+      </ol>
+    </nav>`
+    }
+
     static getHeader(obj) {
       return `<h1>${obj.header}</h1>`;
     }

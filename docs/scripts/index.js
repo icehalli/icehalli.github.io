@@ -13,6 +13,7 @@ class _Config {
     static folder = '';
 
     static urlDetection(url) {
+        //debugger;
         _Config.url = new URL(url);
         _Config.isMock = _Config.url.origin === 'file://';
         _Config.title = _Url.last(_Config.url);
@@ -27,6 +28,20 @@ class _Config {
             str.lastIndexOf(b)
         );
         return mySubString;
+    }
+}
+
+class _Url_Tests {
+    static success = true;
+    static test() {
+        const file_root = "file:///C:/dev/icehalli/icehalli.github.io/docs/index.html";
+        _Config.urlDetection(file_root);
+        if(_Config.folder !== '/') {
+            success = false;
+            console.error(file_root, 'folder fail');
+        }
+
+        console.info('TEST SUCCESSFUL:', this.success)
     }
 }
 
@@ -49,19 +64,57 @@ class _Utils {
 }
 
 class _Page {
+    static getLoading(text, wrapDiv = true) {
+        let res = `Loading ${text} <i class="fa-solid fa-spinner fa-spin"></i>`
+        if(wrapDiv) {
+            return `<div>${res}</div>`;
+        }
+        return res;
+    }
+    static getBreadCrumbs(data) {
+        return [
+            {
+                "label": 'a',
+            },
+            {
+                "label": 'b',
+                "active": true
+            }
+        ];
+    }
     static setup(){
-        var nav = $('<div>').attr('id', 'nav');
-        var header = $('<div>').attr('id', 'header');
-        var content = $('<div>').attr('id', 'content');
+        var nav = $(_Page.getLoading('nav')).attr('id', 'nav');
+        var breadcrumbs = $(_Page.getLoading('breadcrumbs')).attr('id', 'breadcrumbs');
+        var header = $(_Page.getLoading('header')).attr('id', 'header');
+        var content = $(_Page.getLoading('content')).attr('id', 'content');
         $('body').append(nav);
+        // $('body').append(breadcrumbs);
         $('body').append(header);
         $('body').append(content);
+        // setTimeout(function(){
 
         _Ajax.get("index.json", function( data ) {
-            $('#header').html(_Nav.getHeader(data));
-            $('#nav').html(_Nav.get(data));      
+            console.log('_Ajax.get:index.json', data);
+            let headerHtml = '';
+            let navHtml = '';
+            let breadcrumbsHtml = '';
+            breadcrumbsHtml = _Nav.getBreadCrumbs(_Page.getBreadCrumbs(data));
+            if(typeof data === 'object') {
+                headerHtml = _Nav.getHeader(data);
+                navHtml = _Nav.get(data);
+                //breadcrumbsHtml = _Page.getBreadCrumbs(data);
+            } 
+            else {
+                headerHtml = 'No header data';
+                navHtml = 'No nav data';
+                //breadcrumbsHtml = 'No breadcrumbs data';
+            }
+            $('#header').html(headerHtml);
+            $('#nav').html(navHtml); 
+            // $('#breadcrumbs').html(breadcrumbsHtml); 
         });
         _Ajax.get('index.md', function(d){
+            console.log('_Ajax.get:index.md', d);
           const result = _Md.render(d);
           $('#content').html(result);
           $('table').addClass('table').addClass('table-striped');
@@ -73,6 +126,8 @@ class _Page {
             });
           });
         });
+        
+    //}, 3000);
 
     }
 }
