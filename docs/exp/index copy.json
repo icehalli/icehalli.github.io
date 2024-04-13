@@ -1,0 +1,9 @@
+{
+    "scripts": {
+        "util": "scripts/exp/util.js",
+        "tmpl": "scripts/tmpl.js",
+        "config": "scripts/config.js",
+        "md": "scripts/md.js",
+        "nav": "scripts/nav.js"
+    }
+}

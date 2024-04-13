@@ -1,5 +1,30 @@
 {
     "scripts": {
-        "a": "scripts/exp/util.js"
+        "jquery": {
+            "src": "https://code.jquery.com/jquery-3.7.1.min.js",
+            "integrity": "sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=",
+            "crossorigin": "anonymous"
+        },
+        "bootstrap": {
+            "src": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
+            "integrity": "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz",
+            "crossorigin": "anonymous"
+        },
+        "markdown-it": {
+            "src": "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js",
+            "integrity": "sha512-ohlWmsCxOu0bph1om5eDL0jm/83eH09fvqLDhiEdiqfDeJbEvz4FSbeY0gLJSVJwQAp0laRhTXbUQG+ZUuifUQ==",
+            "crossorigin": "anonymous",
+            "referrerpolicy": "no-referrer"
+        },
+        "markdown-it-emoji": {
+            "src": "https://cdnjs.cloudflare.com/ajax/libs/markdown-it-emoji/3.0.0/markdown-it-emoji.min.js",
+            "integrity": "sha512-oEGO1WEAe1nZqI4pvhThiGh3IPUKfmelFhGR0PEOwv9kecA/dJ6FA67Qq8H6T+p/e4rh+lx2T3X7FnWVbYM1DA==",
+            "crossorigin": "anonymous",
+            "referrerpolicy": "no-referrer"
+        },
+        "util": {
+            "src": "scripts/exp/util.js",
+            "disabled": true
+        }
     }
 }
