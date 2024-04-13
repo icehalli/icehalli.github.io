@@ -14,47 +14,9 @@
 
 <script src="../scripts/exp/index.js"></script>
 <script>
-    let json = null;
-    $(document).ready(function(){
-        _Ajax.get('index.json', Definition);
-    });
-    function Definition(data){
-        var error = false;
-        if(typeof data === 'object' && data.fail) {
-            console.log(data.err.statusText, data.err);
-            error = true;
-            data = {
-                "scripts": {
-                    "a": "scripts/exp/util.js"
-                }
-            }
-            //return;
-        }
-        json = data;
-        var root = Root();
-        var scriptsKeys = Object.keys(data.scripts);
-        for(var i of scriptsKeys) {
-            var ss = root + data.scripts[i];
-            console.log(ss);
-            if(error)
-                ApplyScript('console.log("error")');
-            else
-                _Ajax.get(ss, ApplyScript);
-
-        }
-        console.log(Root());
-        console.log(json);
-    }
-    function ApplyScript(s) {
-        console.log('ApplyScript');
-        window.eval(s);
-    }
-
-    function Root(){
-        let r = new URL(window.location.href);
-        return r.protocol + '//' + r.host + '/' + r.pathname.split('/')[1] + '/'
-        // https://icehalli.github.io/docs/something/
-    }
+    
+    
+    
   </script>
 </body>
 </html>
