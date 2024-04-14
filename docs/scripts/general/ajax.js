@@ -5,6 +5,12 @@ class _Ajax {
         else
             this.get(_Config.folder + '/' + url);
     }
+    
+    static getAsync = async(url) => {
+        const response = await fetch(url);
+        console.log(response);
+    }
+
     static get(url, cb) {
         fetch(url)
             .then((response) => response.json())

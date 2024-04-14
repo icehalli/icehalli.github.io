@@ -95,6 +95,7 @@ class _Page {
         var root = _Page.Root();
         for(var i of scriptsKeys) {
             var scriptDef = _Page.waitForLoadedScripts[i];
+            console.log('wait', root, scriptDef.src);
             _Ajax.get(root + scriptDef.src, _Page.ApplyScript, function(){
                 return '$(`body`).append(`Localscript`);';
             });
@@ -166,7 +167,30 @@ class _Ajax {
             this.get(_Config.folder + '/' + url);
     }
     
+    static getAsync = async(url) => {
+        const response = await fetch(url);
+        console.log(response);
+    }
+
     static get(url, cb, fallbackData) {
+        console.log('_Ajax.get', url)
+        fetch(url)
+            .then((response) => response.json(), (err) => {
+                console.error(`Getting ${url}`);
+                if(fallbackData) {
+                    const data = fallbackData();
+                    console.log('Using fallback data', data);
+                    cb(data);
+                }
+                else
+                    cb({fail:true, err});
+            })
+            .then((json) => {
+                cb(json);
+            });
+    }
+
+    static get4(url, cb, fallbackData) {
         fetch(url)
             .then(function(data){
                 cb(data);
