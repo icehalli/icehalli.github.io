@@ -58,4 +58,4 @@ class _Utils {
 
     }
 }
-_Config.urlDetection();
+_Config.urlDetection(window.location.href);

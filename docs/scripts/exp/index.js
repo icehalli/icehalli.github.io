@@ -8,98 +8,165 @@ class _Page {
     static waitForLoadedStyles = {};
     static externalStyleCount = 0;
     static externalScriptCount = 0;
+    static scriptPackages = [];
+    static scriptPagkageIndex = 0;
     static Initialize(){
         _Ajax.get('index.json', _Page.Definition, _Page.DefinitionFallback);
     }
 
     static DefinitionFallback() {
         return {
-            "scripts": {
+            "scripts": [{
                 "jquery": null,
                 "bootstrap": null,
                 "markdown-it": null,
-                "markdown-it-emoji": null,
+                "markdown-it-emoji": null                
+            },
+            {
                 "util": {
                     "src": "scripts/exp/util.js",
                     "disabled": false
                 }
-            },
-            "styles": {
-                "bootstrap": null
-            }
+            }],
+            "styles": [{
+                "bootstrap": null,
+                "index": {
+                    "href": "styles/index.css",
+                    "rel": "stylesheet"
+                }
+            }]
         }
     }
     static Definition(data){
-        var error = '';
-        // if(typeof data === 'object' && data.fail) {
-        //     console.log(data.err.statusText, data.err);
-        //     error = 'Error in get Definition file';
-        //     data = {
-        //         "scripts": {
-        //             "util": {
-        //                 "src": "scripts/exp/util.js",
-        //                 "disabled": true
-        //             },
-        //             "jquery": {
-        //                 "src": "https://code.jquery.com/jquery-3.7.1.min.js",
-        //                 "integrity": "sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=",
-        //                 "crossorigin": "anonymous"
-        //             }
-        //         },
-        //         "styles": {
-        //             "bootstrap": null
-        //         }
-        //     }
-        //     //return;
-        // }
         _Page.json = data;
-        _Page.scriptDefinition = _Page.json.scripts;
-        _Page.styleDefinition = _Page.json.styles;
         console.log('_Page.json', _Page.json);
-        _Page.LoadResources();
+        var resourceHandler = new _ResourceHandler('page', _Page.json);
+        resourceHandler.Load(function() {
+            console.log('SCRIPT LOAD FIN');
+        },function() {
+            console.log('STYLE LOAD FIN');
+        });
+        // _Page.scriptDefinition = _Page.json.scripts;
+        // _Page.styleDefinition = _Page.json.styles;
+        // console.log('_Page.json', _Page.json);
+        // _Page.LoadResources();
     }
-    static LoadResources(){
-        _Page.FixPaths();
+    static LoadResources(){ 
+        var resourceHandler = new _ResourceHandler('page', _Page.json);
+        resourceHandler.Load(function() {
+            console.log('SCRIPT LOAD FIN');
+        },function() {
+            console.log('STYLE LOAD FIN');
+        });
+
+        return;
+        _Page.OrganizeScripts();
+        console.log('packages', _Page.scriptPackages);
+        return;
         _Page.LoadStyles();
-        _Page.LoadScripts();
+        _Page.LoadScriptsPackage(0);
     }
 
-    static FixPaths(){
+    static LoadScriptPackage(idx) {
+        let scripts = _Page.scriptPackages[idx];
+        var scriptsKeys = Object.keys(scripts);
+        for(var key of scriptsKeys) {
+            var scriptDef = scripts[key];
+            _Page.AddScriptToDom(scriptDef);
+            // _Page.AddScript(key, scriptDef);
+        }
+    }
+
+    static OrganizeResources2(){      
+        window.addEventListener("scriptLoaded", (e) => {
+            // let curr = e.detail.idx;
+            // curr++;
+            // if(this.scriptPackages.length >= curr)
+            //     console.log('finished loading script packages');
+            // else 
+            //     _Page.LoadScriptsPackage(curr)
+            // //_Page.ApplyWaitingScripts();
+        });      
+        window.addEventListener("scriptPackageLoaded", (e) => {
+            // let curr = e.detail.idx;
+            // curr++;
+            // if(this.scriptPackages.length >= curr)
+            //     console.log('finished loading script packages');
+            // else 
+            //     _Page.LoadScriptsPackage(curr)
+            // //_Page.ApplyWaitingScripts();
+        });
         var scriptsKeys = Object.keys(_Page.scriptDefinition);
         var styleKeys = Object.keys(_Page.styleDefinition);
         var root = _Page.Root();
         console.log('root', root);
+
+        let scriptPack1 = [];
+        let scriptPack2 = [];
 
         for(var key of scriptsKeys) {
             if(!_Page.scriptDefinition[key])
                 _Page.scriptDefinition[key] = _Page.GetScript(key);
             if(_Page.scriptDefinition[key].src.indexOf('http') < 0) {// local script
                 _Page.scriptDefinition[key].src = root + _Page.scriptDefinition[key].src;
-                _Page.scriptDefinition[key].scriptType = 'local';
+                scriptPack2.push({key,definition: _Page.scriptDefinition[key], dom: _Page.GetScriptDom(_Page.scriptDefinition[key])});
             }
             else {
-                _Page.externalScriptCount++;
-                _Page.scriptDefinition[key].scriptType = 'cdn';
+                scriptPack1.push({key,definition:_Page.scriptDefinition[key]});
             }
         }
+        _Page.scriptPackages.push(scriptPack1);
+        _Page.scriptPackages.push(scriptPack2);
+        let stylePack1 = {};
+        let stylePack2 = {};
         for(var key of styleKeys) {
             if(!_Page.styleDefinition[key])
                 _Page.styleDefinition[key] = _Page.GetStyle(key);
             if(_Page.styleDefinition[key].href.indexOf('http') < 0) {// local script
                 _Page.styleDefinition[key].href = root + _Page.styleDefinition[key].href;            
                 _Page.styleDefinition[key].resourceType = 'local';
+                stylePack2[key] = _Page.styleDefinition[key];
             }
             else {
                 _Page.externalStyleCount++;
                 _Page.styleDefinition[key].resourceType = 'cdn';
+                stylePack1[key] = _Page.styleDefinition[key];
             }
         }
         console.log('_Page.scriptDefinition', _Page.scriptDefinition);
         console.log('_Page.styleDefinition', _Page.styleDefinition);
     }
 
-
     
+    static OrganizeScripts(){    
+        var scriptsKeys = Object.keys(_Page.scriptDefinition);
+        var root = _Page.Root();
+        console.log('root', root);
+
+        var arrOfScripts = [];
+
+        for(var key of scriptsKeys) {
+            arrOfScripts.push(new _Script(key, _Page.scriptDefinition[key]))
+        }
+
+        for(var el of arrOfScripts) {
+            el.Load();
+        }        
+        
+        window.addEventListener("scriptLoaded", (e) => {
+            var d = e.detail;
+            console.log(d.success, d.el.Key, d.el.Dom);
+            // if(d.success)
+            //_Page.ApplyWaitingScripts();
+        });
+        console.log('arrOfScripts', arrOfScripts);
+    }
+
+
+    static GetScriptDom(definition) {
+
+    }
+
     static LoadScripts(){
         var scriptsKeys = Object.keys(_Page.scriptDefinition);
         if(_Page.externalScriptCount > 0){
@@ -307,6 +374,221 @@ class _Page {
         }
     }
 
+}
+
+class _ResourceHandler {
+    Name = '';
+    Json = null;
+    Scripts = [];
+    ScriptPackageIndex = 0;
+    Styles = [];
+    StylePackageIndex = 0;
+    constructor(name, json) {
+        this.Name = name;
+        this.Json = json;
+        this.Scripts = this.Json.scripts;
+        this.Styles = this.Json.styles;
+    }
+    Load(onScriptsLoaded, onStylesLoaded){
+        this.LoadStyles(onStylesLoaded);
+        this.LoadScripts(onScriptsLoaded);
+    }
+    LoadScripts(cb) {
+        window.addEventListener("scriptPackageLoaded", (e) => {
+            this.ScriptPackageIndex++;            
+            console.log('scriptPackageLoaded', e.detail.el);
+            console.log('state', this.Scripts.length, this.ScriptPackageIndex);
+            console.log('continue?', this.Scripts.length >= this.ScriptPackageIndex);
+            if(this.Scripts.length > this.ScriptPackageIndex){
+                console.log('next pack', this.Scripts, this.ScriptPackageIndex, this.Scripts[this.ScriptPackageIndex]);
+                let pack = new _ScriptPackage('package' + this.ScriptPackageIndex, this.Scripts[this.ScriptPackageIndex]);
+                pack.Load();
+            }
+            else{
+                cb();
+            }
+        });
+        let pack = new _ScriptPackage('package0', this.Scripts[0]);
+        pack.Load();
+    }
+    LoadStyles(cb) {
+        window.addEventListener("stylePackageLoaded", (e) => {
+            this.StylePackageIndex++;            
+            console.log('stylePackageLoaded', e.detail.el);
+            console.log('state', this.Styles.length, this.StylePackageIndex);
+            console.log('continue?', this.Styles.length >= this.StylePackageIndex);
+            if(this.Styles.length > this.StylePackageIndex){
+                console.log('next pack', this.Styles, this.StylePackageIndex, this.Styles[this.StylePackageIndex]);
+                let pack = new _StylePackage('stylepackage' + this.StylePackageIndex, this.Styles[this.StylePackageIndex]);
+                pack.Load();
+            }
+            else{
+                cb();
+            }
+        });
+        let pack = new _StylePackage('stylepackage0', this.Styles[0]);
+        pack.Load();
+    }
+}
+
+class _ScriptPackage {
+    Name = '';
+    Definitions = null;
+    ScriptKeys = [];
+    LoadingCount = 0;
+    Scripts = [];
+    constructor(name, definitions){
+        this.Name = name;
+        this.Definitions = definitions;
+        this.ScriptKeys = Object.keys(this.Definitions);
+        this.LoadingCount = this.ScriptKeys.length;
+        console.log('_ScriptPackage', this.Definitions);
+        this._process();
+        this._events();
+    }
+
+    _events(){
+        window.addEventListener("scriptLoaded", (e) => {
+            this.LoadingCount--;
+            if(this.LoadingCount === 0) {
+                const event = new CustomEvent("scriptPackageLoaded", { detail: {success: true, el: this} });
+                dispatchEvent(event);
+            }
+            var d = e.detail;
+            console.log(d.success, d.el.Key, d.el.Dom);
+        });
+    }
+
+    _process(){        
+        for(var key of this.ScriptKeys) {
+            this.Scripts.push(new _Script(key, this.Definitions[key]))
+        } 
+    }
+    Load(){
+        for(var el of this.Scripts) {
+            el.Load();
+        }
+    }
+}
+
+class _StylePackage {
+    Name = '';
+    Definitions = null;
+    ScriptKeys = [];
+    LoadingCount = 0;
+    Scripts = [];
+    constructor(name, definitions){
+        this.Name = name;
+        this.Definitions = definitions;
+        this.ScriptKeys = Object.keys(this.Definitions);
+        this.LoadingCount = this.ScriptKeys.length;
+        console.log('_StylePackage', this.Definitions);
+        this._process();
+        this._events();
+    }
+
+    _events(){
+        window.addEventListener("styleLoaded", (e) => {
+            this.LoadingCount--;
+            if(this.LoadingCount === 0) {
+                const event = new CustomEvent("stylePackageLoaded", { detail: {success: true, el: this} });
+                dispatchEvent(event);
+            }
+            var d = e.detail;
+            console.log(d.success, d.el.Key, d.el.Dom);
+        });
+    }
+
+    _process(){        
+        for(var key of this.ScriptKeys) {
+            this.Scripts.push(new _Style(key, this.Definitions[key]))
+        } 
+    }
+    Load(){
+        for(var el of this.Scripts) {
+            el.Load();
+        }
+    }
+}
+
+class _Script {
+    Key = '';
+    Definition = {};
+    Dom = null
+    constructor(key, definition){
+        this.Key = key; 
+        if(!definition)
+            definition = _Page.GetScript(key);
+        var root = _Page.Root();
+        if(definition.src.indexOf('http') < 0) // local script
+            definition.src = root + definition.src;
+        this.Definition = definition;    
+        console.log('_Script', this.Definition);   
+    }
+    Load() {
+        this._createDom();
+        document.body.appendChild(this.Dom);
+    }
+    _createDom() {
+        this.Dom = document.createElement("script");
+        let scriptKeys = Object.keys(this.Definition);
+        for(let k of scriptKeys){
+            this.Dom.setAttribute(k, this.Definition[k]);
+        }
+        
+        this.Dom.addEventListener("load", () => {
+            this._onLoad(true);
+        });
+        
+        this.Dom.addEventListener("error", (ev) => {
+            this._onLoad(false);
+        });
+    }
+
+    _onLoad(success){
+        const event = new CustomEvent("scriptLoaded", { detail: {success: success, el: this} });
+        dispatchEvent(event);
+    }
+}
+
+class _Style {
+    Key = '';
+    Definition = {};
+    Dom = null
+    constructor(key, definition){
+        this.Key = key; 
+        if(!definition)
+            definition = _Page.GetStyle(key);
+        var root = _Page.Root();
+        if(definition.href.indexOf('http') < 0) // local script
+            definition.href = root + definition.href;
+        this.Definition = definition;    
+        console.log('_Script', this.Definition);   
+    }
+    Load() {
+        this._createDom();
+        document.head.appendChild(this.Dom);
+    }
+    _createDom() {
+        this.Dom = document.createElement("link");
+        let scriptKeys = Object.keys(this.Definition);
+        for(let k of scriptKeys){
+            this.Dom.setAttribute(k, this.Definition[k]);
+        }
+        
+        this.Dom.addEventListener("load", () => {
+            this._onLoad(true);
+        });
+        
+        this.Dom.addEventListener("error", (ev) => {
+            this._onLoad(false);
+        });
+    }
+
+    _onLoad(success){
+        const event = new CustomEvent("styleLoaded", { detail: {success: success, el: this} });
+        dispatchEvent(event);
+    }
 }
 class _Ajax {
     static getInFolder(url, cb) {

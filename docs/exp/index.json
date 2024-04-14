@@ -1,19 +1,21 @@
 {
-    "scripts": {
+    "scripts": [{
         "jquery": null,
         "bootstrap": null,
         "markdown-it": null,
-        "markdown-it-emoji": null,
+        "markdown-it-emoji": null                
+    },
+    {
         "util": {
             "src": "scripts/exp/util.js",
             "disabled": false
         }
-    },
-    "styles": {
+    }],
+    "styles": [{
         "bootstrap": null,
         "index": {
             "href": "styles/index.css",
             "rel": "stylesheet"
         }
-    }
+    }]
 }
