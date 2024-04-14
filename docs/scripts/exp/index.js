@@ -165,7 +165,7 @@ class _Page {
         console.log('AddStyle', key, scriptDef); 
         if(scriptDef.disabled)
             console.warn(`${key} style disabled`)  
-            else if(scriptDef.src.indexOf(_Page.Root() < 0)) { //external style
+            else if(scriptDef.href.indexOf(_Page.Root() < 0)) { //external style
             _Page.AddStyleToDom(scriptDef)
         }
         else {    
