@@ -126,10 +126,12 @@ class _Page {
         var root = _Page.Root();
         for(var i of scriptsKeys) {
             var scriptDef = _Page.waitForLoadedStyles[i];
-            console.log('wait', root, scriptDef.src);
-            _Ajax.get(root + scriptDef.src, _Page.ApplyStyle, function(){
-                return 'body {background-color: green}';
-            });
+            scriptDef.href = root + scriptDef.href;
+            _Page.AddStyle(i, scriptDef);
+            // console.log('wait', root, scriptDef.src);
+            // _Ajax.get(root + scriptDef.src, _Page.ApplyStyle, function(){
+            //     return 'body {background-color: green}';
+            // });
 
         }
     }
@@ -139,10 +141,12 @@ class _Page {
         var root = _Page.Root();
         for(var i of scriptsKeys) {
             var scriptDef = _Page.waitForLoadedScripts[i];
-            console.log('wait', root, scriptDef.src);
-            _Ajax.get(root + scriptDef.src, _Page.ApplyScript, function(){
-                return '$(`body`).append(`Localscript`);';
-            });
+            scriptDef.src = root + scriptDef.src;
+            _Page.AddScript(i, scriptDef);
+            // console.log('wait', root, scriptDef.src);
+            // _Ajax.get(root + scriptDef.src, _Page.ApplyScript, function(){
+            //     return '$(`body`).append(`Localscript`);';
+            // });
 
         }
     }
@@ -150,7 +154,7 @@ class _Page {
         console.log('AddScript', key, scriptDef); 
         if(scriptDef.disabled)
             console.warn(`${key} script disabled`)  
-        else if(scriptDef.integrity) {
+        else if(scriptDef.src.indexOf(_Page.Root() < 0)) { //external script
             _Page.AddScriptToDom(scriptDef)
         }
         else {    
@@ -161,12 +165,33 @@ class _Page {
         console.log('AddStyle', key, scriptDef); 
         if(scriptDef.disabled)
             console.warn(`${key} style disabled`)  
-        else if(scriptDef.integrity) {
+            else if(scriptDef.src.indexOf(_Page.Root() < 0)) { //external style
             _Page.AddStyleToDom(scriptDef)
         }
         else {    
             _Page.waitForLoadedStyles[key] = scriptDef;
         }
+    }
+    
+    static AddLocalScriptToDom(key, scriptDef){
+        console.log('AddLocalScriptToDom', scriptDef);
+        let scriptEle = document.createElement("script");
+        let scriptKeys = Object.keys(scriptDef);
+        for(let k of scriptKeys){
+            scriptEle.setAttribute(k, scriptDef[k]);
+        }
+        document.body.appendChild(scriptEle);
+        scriptEle.addEventListener("load", () => {
+            _Page.ScriptLocalLoaded(key, scriptDef);
+        });
+        
+        scriptEle.addEventListener("error", (ev) => {
+            console.log("Error on loading file", key, ev);
+        });
+    }
+
+    static ScriptLocalLoaded(key, scriptDef){
+        console.log('ScriptLocalLoaded', key);
     }
     static AddScriptToDom(scriptDef){
         console.log('AddScriptToDom', scriptDef);
@@ -242,6 +267,9 @@ class _Page {
 
     static Root(){
         let r = new URL(window.location.href);
+        console.log('root', r);
+        if(r.origin === 'file://')
+            return 'file:///C:/dev/icehalli/icehalli.github.io/docs/';
         return r.protocol + '//' + r.host + '/' + r.pathname.split('/')[1] + '/'
         // https://icehalli.github.io/docs/something/
     }
