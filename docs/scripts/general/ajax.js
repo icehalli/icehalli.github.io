@@ -7,9 +7,14 @@ class _Ajax {
     }
     static get(url, cb) {
         fetch(url)
-            .then(handleFulfilledA, function(data){
-                cb(data);
+            .then((response) => response.json())
+            .then((json) => {
+                cb(json);
             });
+        // fetch(url)
+        //     .then(handleFulfilledA, function(data){
+        //         cb(data);
+        //     });
         // const myPromise = new Promise((resolve, reject) => {
         //     setTimeout(() => {
         //       resolve("foo");
