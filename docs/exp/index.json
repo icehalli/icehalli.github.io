@@ -8,5 +8,8 @@
             "src": "scripts/exp/util.js",
             "disabled": false
         }
+    },
+    "styles": {
+        "bootstrap": null
     }
 }
