@@ -53,18 +53,18 @@ class _Page {
         //     //return;
         // }
         _Page.json = data;
+        _Page.scriptDefinition = _Page.json.scripts;
+        _Page.styleDefinition = _Page.json.styles;
         console.log('_Page.json', _Page.json);
         _Page.LoadResources();
     }
     static LoadResources(){
         _Page.FixPaths();
-        _Page.LoadScripts();
         _Page.LoadStyles();
+        _Page.LoadScripts();
     }
 
     static FixPaths(){
-        _Page.scriptDefinition = _Page.json.scripts;
-        _Page.styleDefinition = _Page.json.styles;
         var scriptsKeys = Object.keys(_Page.scriptDefinition);
         var styleKeys = Object.keys(_Page.styleDefinition);
         var root = _Page.Root();
@@ -113,37 +113,6 @@ class _Page {
         }
     }
 
-    static LoadScripts2(){
-        var scriptsKeys = Object.keys(_Page.json.scripts);
-        _Page.scriptDefinition = _Page.json.scripts;
-        console.log('scripts', scriptsKeys);
-        
-        for(var i of scriptsKeys) {
-            if(!_Page.json.scripts[i])
-            _Page.json.scripts[i] = _Page.GetScript(i);
-            var scriptDef = _Page.json.scripts[i];
-            if(scriptDef.integrity)
-                _Page.externalScriptCount++;
-        }
-        for(var i of scriptsKeys) {
-            var scriptDef = _Page.json.scripts[i];
-            // console.log('scriptDef', scriptDef);
-            _Page.AddScript(i, scriptDef);
-
-        }
-        console.log('_Page.externalScriptCount', _Page.externalScriptCount);
-        if(_Page.externalScriptCount > 0){
-            console.log('listening to scriptsLoaded');
-            window.addEventListener("scriptsLoaded", (e) => {
-                console.log('scriptsLoaded');
-                _Page.ApplyWaitingScripts();
-            });
-        }
-        // console.log(_Page.Root());
-        // console.log(_Page.json);
-
-    }
-
     static LoadStyles(){        
         var keys = Object.keys(_Page.styleDefinition);
         if(_Page.externalStyleCount > 0){
@@ -157,53 +126,15 @@ class _Page {
             _Page.AddStyle(key, scriptDef);
         }
     }
-    static LoadStyles2(){
-        var scriptsKeys = Object.keys(_Page.json.styles);
-        _Page.styleDefinition = _Page.json.styles;
-        console.log('styles', scriptsKeys);
-        
-        for(var i of scriptsKeys) {
-            if(!_Page.json.styles[i])
-            _Page.json.styles[i] = _Page.GetStyle(i);
-            var scriptDef = _Page.json.styles[i];
-            if(scriptDef.integrity)
-                _Page.externalStyleCount++;
-        }
-        console.log('_Page.externalStyleCount', _Page.externalStyleCount);
-        if(_Page.externalStyleCount > 0){
-            console.log('listening to stylesLoaded');
-            window.addEventListener("stylesLoaded", (e) => {
-                console.log('stylesLoaded');
-                _Page.ApplyWaitingStyles();
-            });
-        }
-        for(var i of scriptsKeys) {
-            var scriptDef = _Page.json.styles[i];
-            // console.log('scriptDef', scriptDef);
-            _Page.AddStyle(i, scriptDef);
-        }
-        // console.log(_Page.Root());
-        // console.log(_Page.json);
-
-    }
     static ApplyWaitingStyles(){
         var scriptsKeys = Object.keys(_Page.waitForLoadedStyles);
-        console.log('waitForLoadedStyles', scriptsKeys);
-        var root = _Page.Root();
         for(var i of scriptsKeys) {
             var scriptDef = _Page.waitForLoadedStyles[i];
-            scriptDef.href = root + scriptDef.href;
             _Page.AddStyle(i, scriptDef);
-            // console.log('wait', root, scriptDef.src);
-            // _Ajax.get(root + scriptDef.src, _Page.ApplyStyle, function(){
-            //     return 'body {background-color: green}';
-            // });
-
         }
     }
     static ApplyWaitingScripts(){
         var scriptsKeys = Object.keys(_Page.waitForLoadedScripts);
-        console.log('waitForLoadedScripts', scriptsKeys);
         for(var i of scriptsKeys) {
             var scriptDef = _Page.waitForLoadedScripts[i];
             _Page.AddScript(i, scriptDef);
@@ -253,6 +184,7 @@ class _Page {
         console.log('ScriptLocalLoaded', key);
     }
     static AddScriptToDom(scriptDef){
+        console.log('AddScriptToDom', scriptDef);
         let scriptEle = document.createElement("script");
         let scriptKeys = Object.keys(scriptDef);
         for(let k of scriptKeys){
@@ -268,6 +200,7 @@ class _Page {
         });
     }
     static AddStyleToDom(scriptDef){
+        console.log('AddStyleToDom', scriptDef);
         let scriptEle = document.createElement("link");
         let scriptKeys = Object.keys(scriptDef);
         for(let k of scriptKeys){
@@ -283,44 +216,32 @@ class _Page {
         });
     }
     static StyleLoaded(scriptDef){
-        console.log("File loaded", scriptDef.src);
-        // let div = document.createElement("div");
-        // div.innerHTML = `${scriptDef.src} added`;
-        // let body = document.getElementsByTagName('body')[0];
-        // body.appendChild(div);
-        //$('body').append(`${scriptDef.src} added`);
+        console.log("Style loaded", scriptDef.src);
         _Page.externalStyleCount--;
-        console.log('externalStyleCount', _Page.externalStyleCount);
         if(_Page.externalStyleCount === 0) {
             const event = new CustomEvent("stylesLoaded", { detail: new Date() });
             dispatchEvent(event);
         }
     }
     static ScriptLoaded(scriptDef){
-        console.log("File loaded", scriptDef.src);
-        // let div = document.createElement("div");
-        // div.innerHTML = `${scriptDef.src} added`;
-        // let body = document.getElementsByTagName('body')[0];
-        // body.appendChild(div);
-        //$('body').append(`${scriptDef.src} added`);
+        console.log("Script loaded", scriptDef.src);
         _Page.externalScriptCount--;
-        console.log('externalScriptCount', _Page.externalScriptCount);
         if(_Page.externalScriptCount === 0) {
             const event = new CustomEvent("scriptsLoaded", { detail: new Date() });
             dispatchEvent(event);
         }
     }
-    static ApplyStyle(s) {
-        console.log('ApplyStyle');
-        let div = document.createElement("style");
-        div.innerHTML = s;
-        let head = document.getElementsByTagName('head')[0];
-        head.appendChild(div);
-    }
-    static ApplyScript(s) {
-        console.log('ApplyScript');
-        window.eval(s);
-    }
+    // static ApplyStyle(s) {
+    //     console.log('ApplyStyle');
+    //     let div = document.createElement("style");
+    //     div.innerHTML = s;
+    //     let head = document.getElementsByTagName('head')[0];
+    //     head.appendChild(div);
+    // }
+    // static ApplyScript(s) {
+    //     console.log('ApplyScript');
+    //     window.eval(s);
+    // }
 
     static Root(){
         let r = new URL(window.location.href);
