@@ -10,6 +10,7 @@ class _Page {
     static externalScriptCount = 0;
     static scriptPackages = [];
     static scriptPagkageIndex = 0;
+    static resourceHandler = null;
     static Initialize(){
         _Ajax.get('index.json', _Page.Definition, _Page.DefinitionFallback);
     }
@@ -34,18 +35,44 @@ class _Page {
                     "href": "styles/index.css",
                     "rel": "stylesheet"
                 }
+            }],
+            "layout": [{
+                "basic": {
+                    "url": "scripts/layouts/basic.html"
+                }
             }]
         }
     }
     static Definition(data){
         _Page.json = data;
         console.log('_Page.json', _Page.json);
-        var resourceHandler = new _ResourceHandler('page', _Page.json);
-        resourceHandler.Load(function() {
-            console.log('SCRIPT LOAD FIN');
-        },function() {
-            console.log('STYLE LOAD FIN');
-        });
+        _Page.resourceHandler = new _ResourceHandler('page', _Page.json);
+        _Page.LoadPage();        
+    }
+
+    static LoadPage(){
+        _Page.resourceHandler.Load(_Page._onScriptsLoaded, _Page._onStylesLoaded);
+    }
+
+    static _onScriptsLoaded(){
+        console.log('SCRIPT LOAD FIN');
+        _Page.resourceHandler.LoadLayout(_Page._onLayoutLoaded);
+
+    }
+    static _onStylesLoaded(){
+        console.log('STYLE LOAD FIN');        
+    }
+    static _onLayoutLoaded(){
+        _Page.NavDiv().html('loaded');
+    }
+    static NavDiv(){
+        return _Page.resourceHandler.DOM().Nav;
+    }
+    static HeaderDiv(){
+        return _Page.resourceHandler.DOM().Header;
+    }
+    static ContentDiv(){
+        return _Page.resourceHandler.DOM().Content;
     }
     static Root(){
         let r = new URL(window.location.href);
@@ -120,15 +147,45 @@ class _ResourceHandler {
     ScriptPackageIndex = 0;
     Styles = [];
     StylePackageIndex = 0;
+    Layout = [];
+    LayoutPackageIndex = 0;
+
+    Nodes = {};
     constructor(name, json) {
         this.Name = name;
         this.Json = json;
         this.Scripts = this.Json.scripts;
         this.Styles = this.Json.styles;
+        this.Layout = this.Json.layout;
+    }
+    DOM() {
+        let firstPack = this.Nodes[Object.keys(this.Nodes)[0]];
+        return firstPack.Nodes[Object.keys(firstPack.Nodes)[0]];
     }
     Load(onScriptsLoaded, onStylesLoaded){
+        //this.LoadLayout(onLayoutLoaded);
         this.LoadStyles(onStylesLoaded);
         this.LoadScripts(onScriptsLoaded);
+    }
+    LoadLayout(cb) {
+        window.addEventListener("layoutPackageLoaded", (e) => {
+            console.log('layoutPackageLoaded', this.LayoutPackageIndex);
+            console.log(e.detail);            
+            this.Nodes[e.detail.el.Name] = e.detail.el;
+            //debugger;
+            console.log('this.NodesP', this.Nodes, e.detail);
+            this.LayoutPackageIndex++;
+            if(this.Layout.length > this.LayoutPackageIndex){
+                let pack = new _LayoutPackage('layoutpackage' + this.LayoutPackageIndex, this.Scripts[this.LayoutPackageIndex]);
+                pack.Load();
+            }
+            else{
+                console.log('all layoutPackageLoaded');
+                cb();
+            }
+        });
+        let pack = new _LayoutPackage('layoutpackage0', this.Layout[0]);
+        pack.Load();
     }
     LoadScripts(cb) {
         window.addEventListener("scriptPackageLoaded", (e) => {
@@ -208,6 +265,51 @@ class _ScriptPackage {
     }
 }
 
+class _LayoutPackage {
+    Name = '';
+    Definitions = null;
+    ScriptKeys = [];
+    LoadingCount = 0;
+    Scripts = [];
+    Nodes = {};
+    constructor(name, definitions){
+        this.Name = name;
+        this.Definitions = definitions;
+        this.ScriptKeys = Object.keys(this.Definitions);
+        this.LoadingCount = this.ScriptKeys.length;
+        console.log('_LayoutPackage', this.Definitions);
+        this._process();
+        this._events();
+    }
+
+    _events(){
+        window.addEventListener("layoutLoaded", (e) => {
+            console.log('layoutLoaded', this.LoadingCount);
+            this.Nodes[e.detail.el.Key] = e.detail.el;
+            //debugger;
+            console.log('this.Nodes', this.Nodes, e.detail);
+            this.LoadingCount--;
+            if(this.LoadingCount === 0) {
+                const event = new CustomEvent("layoutPackageLoaded", { detail: {success: true, el: this} });
+                dispatchEvent(event);
+            }
+            var d = e.detail;
+            console.log(d.success, d.el.Key, d.el.Dom);
+        });
+    }
+
+    _process(){        
+        for(var key of this.ScriptKeys) {
+            this.Scripts.push(new _Layout(key, this.Definitions[key]))
+        } 
+    }
+    Load(){
+        for(var el of this.Scripts) {
+            el.Load();
+        }
+    }
+}
+
 class _StylePackage {
     Name = '';
     Definitions = null;
@@ -245,6 +347,86 @@ class _StylePackage {
         for(var el of this.Scripts) {
             el.Load();
         }
+    }
+}
+
+
+class _Layout {
+    Key = '';
+    Definition = {};
+    Dom = null;
+    Elements = {};
+    Nav = null;
+    Header = null;
+    Content = null;
+    constructor(key, definition){
+        this.Key = key; 
+        // if(!definition)
+        //     definition = _Page.GetScript(key);
+        var root = _Page.Root();
+        if(definition.url.indexOf('http') < 0) // local script, always local though
+            definition.url = root + definition.url;
+        this.Definition = definition;    
+        console.log('_Layout', this.Definition);   
+    }
+    Load(){
+        _Ajax.get(this.Definition.url, (data) => {
+            console.log('Layout:get:data', data);
+            this._Load(data);
+        }, () => {
+            return `<div id="nav">nav</div>
+            <div id="header">header</div>
+            <div id="content">content</div>`;
+        });
+    }
+    _Load(data) {
+        var layout = $('<div>');
+        layout.html(data);
+        var divs = layout.find("div[id]");
+        console.log('divs', divs.length);
+        divs.each((i, el) => {
+            var element = $(el);
+            console.log(element);
+            $('body').append(element);
+            var id = element.attr('id');
+            this.Elements[id] = element;
+            if(id==='nav')
+                this.Nav = element;
+            if(id==='header')
+                this.Header = element;
+            if(id==='content')
+                this.Content = element;
+        });
+        console.log('Elements', this.Elements);
+        console.log('Nav', this.Nav);
+        console.log('Header', this.Header);
+        console.log('Content', this.Content);
+        // console.log('laytou load: ', $(data));
+        // $('body').append(layout);
+        // this._createDom();
+        // document.body.appendChild(this.Dom);
+        this._onLoad(true);
+
+    }
+    _createDom() {
+        this.Dom = document.createElement("script");
+        let scriptKeys = Object.keys(this.Definition);
+        for(let k of scriptKeys){
+            this.Dom.setAttribute(k, this.Definition[k]);
+        }
+        
+        this.Dom.addEventListener("load", () => {
+            this._onLoad(true);
+        });
+        
+        this.Dom.addEventListener("error", (ev) => {
+            this._onLoad(false);
+        });
+    }
+
+    _onLoad(success){
+        const event = new CustomEvent("layoutLoaded", { detail: {success: success, el: this} });
+        dispatchEvent(event);
     }
 }
 

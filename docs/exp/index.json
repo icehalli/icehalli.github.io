@@ -17,5 +17,10 @@
             "href": "styles/index.css",
             "rel": "stylesheet"
         }
+    }],
+    "layout": [{
+        "basic": {
+            "url": "scripts/layouts/basic.html"
+        }
     }]
 }
