@@ -31,37 +31,89 @@ class _Page {
     }
     static Definition(data){
         var error = '';
-        if(typeof data === 'object' && data.fail) {
-            console.log(data.err.statusText, data.err);
-            error = 'Error in get Definition file';
-            data = {
-                "scripts": {
-                    "util": {
-                        "src": "scripts/exp/util.js",
-                        "disabled": true
-                    },
-                    "jquery": {
-                        "src": "https://code.jquery.com/jquery-3.7.1.min.js",
-                        "integrity": "sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=",
-                        "crossorigin": "anonymous"
-                    }
-                },
-                "styles": {
-                    "bootstrap": null
-                }
-            }
-            //return;
-        }
+        // if(typeof data === 'object' && data.fail) {
+        //     console.log(data.err.statusText, data.err);
+        //     error = 'Error in get Definition file';
+        //     data = {
+        //         "scripts": {
+        //             "util": {
+        //                 "src": "scripts/exp/util.js",
+        //                 "disabled": true
+        //             },
+        //             "jquery": {
+        //                 "src": "https://code.jquery.com/jquery-3.7.1.min.js",
+        //                 "integrity": "sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=",
+        //                 "crossorigin": "anonymous"
+        //             }
+        //         },
+        //         "styles": {
+        //             "bootstrap": null
+        //         }
+        //     }
+        //     //return;
+        // }
         _Page.json = data;
         console.log('_Page.json', _Page.json);
         _Page.LoadResources();
     }
     static LoadResources(){
+        _Page.FixPaths();
         _Page.LoadScripts();
         _Page.LoadStyles();
     }
 
+    static FixPaths(){
+        _Page.scriptDefinition = _Page.json.scripts;
+        _Page.styleDefinition = _Page.json.styles;
+        var scriptsKeys = Object.keys(_Page.scriptDefinition);
+        var styleKeys = Object.keys(_Page.styleDefinition);
+        var root = _Page.Root();
+        console.log('root', root);
+
+        for(var key of scriptsKeys) {
+            if(!_Page.scriptDefinition[key])
+                _Page.scriptDefinition[key] = _Page.GetScript(key);
+            if(_Page.scriptDefinition[key].src.indexOf('http') < 0) {// local script
+                _Page.scriptDefinition[key].src = root + _Page.scriptDefinition[key].src;
+                _Page.scriptDefinition[key].scriptType = 'local';
+            }
+            else {
+                _Page.externalScriptCount++;
+                _Page.scriptDefinition[key].scriptType = 'cdn';
+            }
+        }
+        for(var key of styleKeys) {
+            if(!_Page.styleDefinition[key])
+                _Page.styleDefinition[key] = _Page.GetStyle(key);
+            if(_Page.styleDefinition[key].href.indexOf('http') < 0) {// local script
+                _Page.styleDefinition[key].href = root + _Page.styleDefinition[key].href;            
+                _Page.styleDefinition[key].resourceType = 'local';
+            }
+            else {
+                _Page.externalStyleCount++;
+                _Page.styleDefinition[key].resourceType = 'cdn';
+            }
+        }
+        console.log('_Page.scriptDefinition', _Page.scriptDefinition);
+        console.log('_Page.styleDefinition', _Page.styleDefinition);
+    }
+
+
+    
     static LoadScripts(){
+        var scriptsKeys = Object.keys(_Page.scriptDefinition);
+        if(_Page.externalScriptCount > 0){
+            window.addEventListener("scriptsLoaded", (e) => {
+                _Page.ApplyWaitingScripts();
+            });
+        }
+        for(var key of scriptsKeys) {
+            var scriptDef = _Page.scriptDefinition[key];
+            _Page.AddScript(key, scriptDef);
+        }
+    }
+
+    static LoadScripts2(){
         var scriptsKeys = Object.keys(_Page.json.scripts);
         _Page.scriptDefinition = _Page.json.scripts;
         console.log('scripts', scriptsKeys);
@@ -91,7 +143,21 @@ class _Page {
         // console.log(_Page.json);
 
     }
-    static LoadStyles(){
+
+    static LoadStyles(){        
+        var keys = Object.keys(_Page.styleDefinition);
+        if(_Page.externalStyleCount > 0){
+            window.addEventListener("stylesLoaded", (e) => {
+                console.log('stylesLoaded');
+                _Page.ApplyWaitingStyles();
+            });
+        }
+        for(var key of keys) {
+            var scriptDef = _Page.styleDefinition[key];
+            _Page.AddStyle(key, scriptDef);
+        }
+    }
+    static LoadStyles2(){
         var scriptsKeys = Object.keys(_Page.json.styles);
         _Page.styleDefinition = _Page.json.styles;
         console.log('styles', scriptsKeys);
@@ -138,23 +204,17 @@ class _Page {
     static ApplyWaitingScripts(){
         var scriptsKeys = Object.keys(_Page.waitForLoadedScripts);
         console.log('waitForLoadedScripts', scriptsKeys);
-        var root = _Page.Root();
         for(var i of scriptsKeys) {
             var scriptDef = _Page.waitForLoadedScripts[i];
-            scriptDef.src = root + scriptDef.src;
             _Page.AddScript(i, scriptDef);
-            // console.log('wait', root, scriptDef.src);
-            // _Ajax.get(root + scriptDef.src, _Page.ApplyScript, function(){
-            //     return '$(`body`).append(`Localscript`);';
-            // });
 
         }
     }
     static AddScript(key, scriptDef){     
-        console.log('AddScript', key, scriptDef); 
+        console.log('AddScript', key); 
         if(scriptDef.disabled)
             console.warn(`${key} script disabled`)  
-        else if(scriptDef.src.indexOf(_Page.Root() < 0)) { //external script
+        else if(scriptDef.resourceType === 'cdn') { //external script
             _Page.AddScriptToDom(scriptDef)
         }
         else {    
@@ -162,10 +222,10 @@ class _Page {
         }
     }
     static AddStyle(key, scriptDef){     
-        console.log('AddStyle', key, scriptDef); 
+        console.log('AddStyle', key); 
         if(scriptDef.disabled)
             console.warn(`${key} style disabled`)  
-            else if(scriptDef.href.indexOf(_Page.Root() < 0)) { //external style
+        else if(scriptDef.resourceType === 'cdn') { //external style
             _Page.AddStyleToDom(scriptDef)
         }
         else {    
@@ -174,7 +234,6 @@ class _Page {
     }
     
     static AddLocalScriptToDom(key, scriptDef){
-        console.log('AddLocalScriptToDom', scriptDef);
         let scriptEle = document.createElement("script");
         let scriptKeys = Object.keys(scriptDef);
         for(let k of scriptKeys){
@@ -194,7 +253,6 @@ class _Page {
         console.log('ScriptLocalLoaded', key);
     }
     static AddScriptToDom(scriptDef){
-        console.log('AddScriptToDom', scriptDef);
         let scriptEle = document.createElement("script");
         let scriptKeys = Object.keys(scriptDef);
         for(let k of scriptKeys){
@@ -210,7 +268,6 @@ class _Page {
         });
     }
     static AddStyleToDom(scriptDef){
-        console.log('AddStyleToDom', scriptDef);
         let scriptEle = document.createElement("link");
         let scriptKeys = Object.keys(scriptDef);
         for(let k of scriptKeys){
@@ -275,23 +332,17 @@ class _Page {
     }
 
     static GetScript(key){
-        console.log('getfixed', key);
         let fixed = _Page.GetFixedScripts();
         let fixedKeys = Object.keys(fixed);
-        console.log('fixedkeys', fixedKeys);
         if(fixedKeys.indexOf(key) > -1){
-            console.log('fixed', key, fixed[key]);
             return fixed[key];
         }
         return null;
     }
     static GetStyle(key){
-        console.log('getfixed', key);
         let fixed = _Page.GetFixedStyles();
         let fixedKeys = Object.keys(fixed);
-        console.log('fixedkeys', fixedKeys);
         if(fixedKeys.indexOf(key) > -1){
-            console.log('fixed', key, fixed[key]);
             return fixed[key];
         }
         return null;
