@@ -13,28 +13,10 @@ class _Page {
     static DefinitionFallback() {
         return {
             "scripts": {
-                "jquery": {
-                    "src": "https://code.jquery.com/jquery-3.7.1.min.js",
-                    "integrity": "sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=",
-                    "crossorigin": "anonymous"
-                },
-                "bootstrap": {
-                    "src": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
-                    "integrity": "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz",
-                    "crossorigin": "anonymous"
-                },
-                "markdown-it": {
-                    "src": "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js",
-                    "integrity": "sha512-ohlWmsCxOu0bph1om5eDL0jm/83eH09fvqLDhiEdiqfDeJbEvz4FSbeY0gLJSVJwQAp0laRhTXbUQG+ZUuifUQ==",
-                    "crossorigin": "anonymous",
-                    "referrerpolicy": "no-referrer"
-                },
-                "markdown-it-emoji": {
-                    "src": "https://cdnjs.cloudflare.com/ajax/libs/markdown-it-emoji/3.0.0/markdown-it-emoji.min.js",
-                    "integrity": "sha512-oEGO1WEAe1nZqI4pvhThiGh3IPUKfmelFhGR0PEOwv9kecA/dJ6FA67Qq8H6T+p/e4rh+lx2T3X7FnWVbYM1DA==",
-                    "crossorigin": "anonymous",
-                    "referrerpolicy": "no-referrer"
-                },
+                "jquery": null,
+                "bootstrap": null,
+                "markdown-it": null,
+                "markdown-it-emoji": null,
                 "util": {
                     "src": "scripts/exp/util.js",
                     "disabled": false
@@ -68,6 +50,8 @@ class _Page {
         console.log('scripts', scriptsKeys);
         
         for(var i of scriptsKeys) {
+            if(!data.scripts[i])
+                data.scripts[i] = _Page.GetScript(i);
             var scriptDef = data.scripts[i];
             if(scriptDef.integrity)
                 _Page.externalScriptCount++;
@@ -157,6 +141,45 @@ class _Page {
         let r = new URL(window.location.href);
         return r.protocol + '//' + r.host + '/' + r.pathname.split('/')[1] + '/'
         // https://icehalli.github.io/docs/something/
+    }
+
+    static GetScript(key){
+        console.log('getfixed', key);
+        let fixed = _Page.GetFixedScripts();
+        let fixedKeys = Object.keys(fixed);
+        console.log('fixedkeys', fixedKeys);
+        if(fixedKeys.indexOf(key) > -1){
+            console.log('fixed', key, fixed[key]);
+            return fixed[key];
+        }
+        return null;
+    }
+
+    static GetFixedScripts() {
+        return {
+            "jquery": {
+                "src": "https://code.jquery.com/jquery-3.7.1.min.js",
+                "integrity": "sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=",
+                "crossorigin": "anonymous"
+            },
+            "bootstrap": {
+                "src": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
+                "integrity": "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz",
+                "crossorigin": "anonymous"
+            },
+            "markdown-it": {
+                "src": "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js",
+                "integrity": "sha512-ohlWmsCxOu0bph1om5eDL0jm/83eH09fvqLDhiEdiqfDeJbEvz4FSbeY0gLJSVJwQAp0laRhTXbUQG+ZUuifUQ==",
+                "crossorigin": "anonymous",
+                "referrerpolicy": "no-referrer"
+            },
+            "markdown-it-emoji": {
+                "src": "https://cdnjs.cloudflare.com/ajax/libs/markdown-it-emoji/3.0.0/markdown-it-emoji.min.js",
+                "integrity": "sha512-oEGO1WEAe1nZqI4pvhThiGh3IPUKfmelFhGR0PEOwv9kecA/dJ6FA67Qq8H6T+p/e4rh+lx2T3X7FnWVbYM1DA==",
+                "crossorigin": "anonymous",
+                "referrerpolicy": "no-referrer"
+            }
+        }
     }
 }
 class _Ajax {
