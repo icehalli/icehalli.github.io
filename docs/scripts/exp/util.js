@@ -59,3 +59,4 @@ class _Utils {
     }
 }
 _Config.urlDetection(window.location.href);
+document.title = _Config.title;
