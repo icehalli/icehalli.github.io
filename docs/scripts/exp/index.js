@@ -569,7 +569,14 @@ class _Ajax {
     static get(url, cb, fallbackData) {
         console.log('_Ajax.get', url)
         fetch(url)
-            .then((response) => response.json(),
+            .then((response) => {
+                let body = response.body.Content.trim();
+                console.log('fetch:body', body);
+                if(body.indexOf('{') === 0 || body.indexOf('[') === 0)
+                    return response.json();
+                else
+                    return body;
+            },
             function(err) {
                 console.error(`Getting ${url}`);
                 if(fallbackData) {
