@@ -1,0 +1,14 @@
+{
+    "home": "home",
+    "url": "#",
+    "tabs": [
+        {
+            "label": "hello",
+            "url": "mbl.is"
+        },
+        {
+            "label": "hello2",
+            "url": "mbl.is"
+        }
+    ]
+}
