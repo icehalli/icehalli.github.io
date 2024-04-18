@@ -14,6 +14,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.8/handlebars.min.js" integrity="sha512-E1dSFxg+wsfJ4HKjutk/WaCzK7S2wv1POn1RRPGh8ZK+ag9l244Vqxji3r6wgz9YBf6+vhQEYJZpSjqWFPg9gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
+    var Tree = {};
+    var arr = [];
+    var CurrKey = '';
     $(document).ready(function(){
         ready();
     });
@@ -31,9 +34,14 @@
             _ComponentLoader.getDataByKey(toget, getKeys);
         }
         static getDataByKey(toget, keys){
-            if(keys.length === 0)
+            if(keys.length === 0) {
+                //load finished
+                console.log('arr', arr);
                 return;
+            }
             var k = keys[0];
+            CurrKey = k;
+            arr.push(CurrKey);
             keys.shift();
             var item = toget[k];
             console.log(item);
@@ -196,7 +204,7 @@
     function get(url, cb){
         setTimeout(function() {            
             getMock(url, cb);
-        }, 1000);
+        }, 100);
     }
     function getMock(url, cb){
         console.log('getMock', url);
