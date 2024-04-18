@@ -27,46 +27,66 @@
         border: '1px solid blue';
         background-color: #094f66;
     }
-    div.proppre::before {
+    /* div.proppre::before {
         font: var(--fa-font-regular);
         content: '\f071';
-    }
+    } */
     div.proppre:hover {    
         background-color: #ADD8FF;
-        color:black
+        color:black;
+        border: 1px solid blue;
+    }
+    .jsontext {
+        background-color: #90EE90;
+        color:black;
+        border: 2px solid green;
+    }
+    .jsontext:hover {
+        padding: 10px;
+        background-color: white;
     }
 </style>
 </head>
 <body>
-    <div id="nav">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
-            <a class="navbar-brand" href="_json.string.url_">_json.string.home_</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse">
-              <ul noid="navlis" class="navbar-nav">
-                <li class="nav-item">
-                  <a class="nav-link active" data-url="mbl.is" aria-current="page" href="_json.array.tabs.string.url_">_json.array.tabs.string.label_</a>
-                </li>
-              </ul>
+    <div id="navTemplate">
+        <div id="nav">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                <a class="navbar-brand" href="_json.string.url_">_json.string.home_</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse">
+                <ul noid="navlis" class="navbar-nav">
+                    <li class="nav-item">
+                    <a class="nav-link active" data-url="mbl.is" aria-current="page" href="_json.array.tabs.string.url_">_json.array.tabs.string.label_</a>
+                    </li>
+                </ul>
+                </div>
             </div>
-          </div>
-        </nav></div>
-        <div id="header"><span>_json.string.data_</span></div>
-        <div id="content"><span>_json.string.data_</span></div>
+            </nav></div>
+        </div>
+        <div id="headerTemplate">
+            <div id="header"><span>_json.string.data_</span></div>
+        </div>
+        <div id="contentTemplate">
+            <div id="content"><span>_json.string.data_</span></div> 
+        </div>
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script>    
     var ids = [];
+        console.log('drasl');
     $(document).ready(function(){
         //ready();
-        var layout = $('body');
+        console.log('what');
+        var divToGet = 'body';
+        var layout = $(divToGet);
         var stuff = layout.html();
-        $('body').empty();
+        console.log('html', stuff);
+        $(divToGet).empty();
         stuff = removeScript(stuff);
         var p = parseHtml(stuff);
-        renderHtml(p, 0, 'body');
+        renderHtml(p, 0, divToGet);
         //console.log('parseHtml', parseHtml(stuff));
         //AppendPre(removeScript(stuff));
     });
@@ -275,6 +295,8 @@
 //debugger
 var domDiv = null;
         if(StringIsHtml(content)){
+            if(content === '<body>')
+                content = '';
             domDiv = $('<div>');
             var domdivId = 'domDiv'+getRandomInt(1, 1000);
             domDiv.attr('id', domdivId);
@@ -287,7 +309,7 @@ var domDiv = null;
                 pre.html(encodeHtml(object.start));
             else
                 pre.html(encodeHtml(content));
-            pre.append(`<span class="sp">(${domdivId})</span>`)
+            //pre.append(`<span class="sp">(${domdivId})</span>`) //include wrapperid
             domDiv.append(pre);
             parentEl.append(domDiv);
             //parentEl.append(`(${domdivId})`)
@@ -312,8 +334,23 @@ var domDiv = null;
                         var propId = 'prop'+getRandomInt(1, 1000);
                         prop.attr('id', propId);
                         //prop.css({marginLeft: '-15px'});
+                        var jsonprop = '';
+                        if(it.indexOf('_json.') > -1){
+                            jsonprop = it;
+                            it = '';
+                        }
                         prop.html(p+"="+it);
-                        prop.append(`<span class="sp">(${propId})</span>`)
+                        if(jsonprop){
+                            var domDivLeaf = $('<span>')
+                            var proppreId = 'proppre'+getRandomInt(1, 1000);
+                            domDivLeaf.attr('id', proppreId);
+                            // domDivLeaf.css({border: '1px solid green'});
+                            // domDivLeaf.css({backgroundColor: '#90EE90'});
+                            domDivLeaf.addClass('jsontext');
+                            domDivLeaf.html(jsonprop);
+                            prop.append(domDivLeaf);
+                        }
+                        //prop.append(`<span class="sp">(${propId})</span>`)//include wrapperid
                         //debugger
                         proppre.append(prop);
                         
@@ -337,15 +374,16 @@ var domDiv = null;
             parentEl.append(pre);
         }
         else{  
-            var domDivLeaf = $('<div>')
+            var domDivLeaf = $('<span>')
             var proppreId = 'proppre'+getRandomInt(1, 1000);
             domDivLeaf.attr('id', proppreId);
-            domDivLeaf.css({marginLeft: '40px'});
-            domDivLeaf.css({border: '1px solid green'});
-            domDivLeaf.css({backgroundColor: '#90EE90'});
+            domDivLeaf.addClass('jsontext');
+            // domDivLeaf.css({marginLeft: '40px'});
+            // domDivLeaf.css({border: '1px solid green'});
+            // domDivLeaf.css({backgroundColor: '#90EE90'});
 
-            pre.html('Text:'+content);
-            domDivLeaf.append(pre);
+            //pre.html('Text:'+content);
+            domDivLeaf.append(content);
             parentEl.append(domDivLeaf);
         }
         //debugger
