@@ -1,15 +1,106 @@
+class _JsonArrayToJson {
+    static getJson(array){
+        var allText = '';
+        for(var i = 0; i< array.length;i++){
+            var s = array[i];
+            allText += s;
+        }
+        
+        var res = this.ext2(allText);
+        return res.result;
+
+    }
+    static ext2(text){
+        var keys = [];
+        var jsonKey = '_json.';
+        var secondKey = '_';
+        while(true) {
+            var index = text.indexOf(jsonKey)
+            text = text.substring(index);
+            text = text.replace(jsonKey, '');
+            var index2 = text.indexOf(secondKey);
+            keys.push(text.substring(0, index2));
+            text = text.substring(index2);
+            if(text.indexOf(jsonKey) < 0)
+                break;
+        }
+        var result = {};
+        var domString = [];
+       // debugger;
+        for(var key of keys){
+            domString.push(key);
+            var parts = key.split('.');
+            var jsonType = 'key';
+            if(parts[0] === 'array') {
+        //debugger;
+                jsonType = 'array';
+            }
+            else if(parts[0] === 'object'){
+                jsonType = 'object';
+            }
+            else{
+                jsonType = 'key';
+            }
+            var obOrArrName = '';
+            var type = 'string';
+            var name = 'unknown';
+            if(jsonType !== 'key'){
+                if(jsonType === 'array'){
+                    obOrArrName = parts[1];
+                    type = parts[2];
+                    name = parts[3];
+                    if(!result[obOrArrName])
+                        result[obOrArrName] = [{}];
+                    result[obOrArrName][0][name] = type;
+                    //result[name] = [{}]
+                }
+                else if(jsonType === 'object'){
+                    obOrArrName = parts[1];
+                    type = parts[2];
+                    name = parts[3];
+                    if(!result[obOrArrName])
+                        result[obOrArrName] = {};
+                    result[obOrArrName][name] = type;
+                }
+            }
+            else {
+                //debugger
+                type = parts[0];
+                name = parts[1];
+                    result[name] = type;
+            }
+            console.log('def', name, type, jsonType, obOrArrName);
+        }
+        return {
+            result,
+            domString
+        };
+    }
+
+}
 class _ParserRenderer {
     static includeWrapperid = false;
     static allPropsVisible = true;
     static ElementTag = 'div';
     static WrapperTag = 'div';
     static PropertyTag = 'div';
+    static JsonArray = [];
     static Render(parsedResult, divToGet) {
         this.renderHtml(parsedResult, 0, divToGet);
         this.CloseTags();
         this.AddCollapse();
         this.AddBorderEmphasis();
         this.AppendToolbar();    
+        this.AppendJsonArray();
+    }
+    static AppendJsonArray(){
+        //debugger
+        var json = _JsonArrayToJson.getJson(_ParserRenderer.JsonArray);
+        var jsonarray = _ParserHelpers.getElement('div', 'jsonarray', null, '');
+        var jsonpre = _ParserHelpers.getElement('pre', 'jsonpre', null, '');
+        jsonpre.html(JSON.stringify(json, null, 2));
+        jsonarray.html(jsonpre);
+        $('body').append(jsonarray);
     }
     static AppendToolbar(){
        var toolbar = _ParserHelpers.getElement('div', 'toolbar', null, '');
@@ -39,7 +130,6 @@ class _ParserRenderer {
     static AddBorderEmphasis(){
         $('.domdiv').each((i, el) => {
             var parents = $(el).parents('div').length + 1;
-            console.log(parents);
             $(el).css({borderWidth: parents + 'px'});
         });
     }
@@ -127,6 +217,7 @@ class _ParserRenderer {
                     var jsonprop = '';
                     if(it.indexOf('_json.') > -1){
                         jsonprop = it;
+                        _ParserRenderer.JsonArray.push(it);
                         it = '';
                     }
                     prop.html(p+"="+it);
@@ -148,10 +239,13 @@ class _ParserRenderer {
         this.AppendText(parentEl, JSON.stringify(content, null, 2));
     }
 
-    static AppendText(parentEl, content) {
+    static AppendText(parentEl, content) {        
+        if(content.indexOf('_json.') > -1)
+            _ParserRenderer.JsonArray.push(content);
         var domDivLeaf = _ParserHelpers.getElement('div', 'jsontext', null, 'proppre');
-        domDivLeaf.append('TEXT:' + content);
-        parentEl.append(domDivLeaf);
+        domDivLeaf.append(content);
+        //debugger
+        parentEl.parent().append(domDivLeaf);
     }
     
     static LastDomDiv = null;
