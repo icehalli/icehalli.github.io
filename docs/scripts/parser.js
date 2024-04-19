@@ -1,10 +1,27 @@
 class _ParserRenderer {
     static includeWrapperid = false;
+    static allPropsVisible = true;
+    static ElementTag = 'div';
+    static WrapperTag = 'div';
+    static PropertyTag = 'div';
     static Render(parsedResult, divToGet) {
         this.renderHtml(parsedResult, 0, divToGet);
-        console.log('fin');
         this.CloseTags();
-    
+        this.AddCollapse();
+        this.AddBorderEmphasis();
+        this.AppendToolbar();    
+    }
+    static AppendToolbar(){
+       var toolbar = _ParserHelpers.getElement('div', 'toolbar', null, '');
+        $('body').prepend(toolbar);
+        var toggleAll = _ParserHelpers.getElement('button', 'toggleAll', null, '');
+        toggleAll.attr('type', 'button');
+        toggleAll.html('Toggle');
+        toggleAll.on('click', function(){
+            _ParserRenderer.allPropsVisible = !_ParserRenderer.allPropsVisible;
+            _ParserRenderer.ToggleAllProps(_ParserRenderer.allPropsVisible);
+        });
+        toolbar.append(toggleAll);
     }
     static renderHtml(item, indent=0, parent){
         var parent = this.AppendPre(item, parent);
@@ -17,7 +34,41 @@ class _ParserRenderer {
             if(parent !== 'body')
                 this.AppendPre(item.rest, parent);
         }
-        //this.CloseTags();
+    }
+
+    static AddBorderEmphasis(){
+        $('.domdiv').each((i, el) => {
+            var parents = $(el).parents('div').length + 1;
+            console.log(parents);
+            $(el).css({borderWidth: parents + 'px'});
+        });
+    }
+
+    static ToggleProps($this, force){      
+        //debugger  
+        var closed = $this.data('closed');        
+        if(typeof force !== 'undefined') {
+            closed = force ? 0 : 1;
+        }
+        var propChildren = $this.parent().parent().children('.proppre');   
+        var textSiblings = $this.siblings('.jsontext');     
+        propChildren.css({display: closed ? 'none' : 'block'});
+        textSiblings.css({display: closed ? 'none' : 'block'});
+        $this.data('closed', closed === 0 ? 1 : 0);
+    }
+
+    static ToggleAllProps(show = true){
+        $('.element').each((i, el) => {
+            _ParserRenderer.ToggleProps($(el), show)
+        });
+
+    }
+
+    static AddCollapse(){
+        $('.element').attr('data-closed', 1);
+        $('.element').on('click', function () {
+            _ParserRenderer.ToggleProps($(this));
+        });
     }
     
     static CloseTags(){
@@ -28,7 +79,7 @@ class _ParserRenderer {
             //debugger
             text = text.replace('&lt;', '&lt;/').replace('&#60;', '&#60;/');            
             //var htmlEncoded = _ParserHelpers.encodeHtml(text);
-            var domElement = _ParserHelpers.getElement('div', 'element', null, 'element');
+            var domElement = _ParserHelpers.getElement(_ParserRenderer.ElementTag, 'element', null, 'element');
             domElement.append(text);
             j.parent().parent().append(domElement);
         });
@@ -46,7 +97,7 @@ class _ParserRenderer {
     }
 
     static AppendHtml(parentEl, object, content) {
-        var domWrapper = _ParserHelpers.getElement('div', 'wrapper', null, 'wrapper');
+        var domWrapper = _ParserHelpers.getElement(_ParserRenderer.WrapperTag, 'wrapper', null, 'wrapper');
         var domDiv = _ParserHelpers.getElement('div', 'domdiv', null, 'domDiv');
 
         if(content === '<body>')
@@ -54,7 +105,7 @@ class _ParserRenderer {
             
         if(object.start) {
             var htmlEncoded = _ParserHelpers.encodeHtml(object.start);
-            var domElement = _ParserHelpers.getElement('div', 'element', null, 'element');
+            var domElement = _ParserHelpers.getElement(_ParserRenderer.ElementTag, 'element', null, 'element');
             domElement.append(htmlEncoded);
             domWrapper.html(domElement);
         }
@@ -65,7 +116,7 @@ class _ParserRenderer {
         domDiv.append(domWrapper);
         parentEl.append(domDiv);
         if(object.parsed){
-            var proppre = _ParserHelpers.getElement('div', 'proppre', null, 'proppre');
+            var proppre = _ParserHelpers.getElement(_ParserRenderer.PropertyTag, 'proppre', null, 'proppre');
             domDiv.append(proppre);
             var parsedKeys = Object.keys(object.parsed);
             
@@ -121,8 +172,8 @@ class _ParserRenderer {
             this.AppendJson(parentEl, content);
         }
         else{  
-            console.log('this.LastDomDiv.children', this.LastDomDiv.children()[0]);
-            console.log('content', content);
+            // console.log('this.LastDomDiv.children', this.LastDomDiv.children()[0]);
+            // console.log('content', content);
             this.AppendText($(this.LastDomDiv.children()[0]), content);
         }
         return parentEl;

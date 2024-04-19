@@ -9,6 +9,7 @@
 <script src="../scripts/parser.js"></script>
 </head>
 <body>
+    <div id="container">
     <div id="navTemplate">
         <div id="nav">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -33,12 +34,13 @@
         <div id="contentTemplate">
             <div id="content"><span>_json.string.data_</span></div> 
         </div>
+    </div>
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script>    
     
     $(document).ready(function(){
         //ready();
-        _Parser.ParseAndRender('body');
+        _Parser.ParseAndRender('#container');
         // var layout = $(divToGet);
         // var stuff = layout.html();
         // console.log('html', stuff);
