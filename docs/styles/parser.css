@@ -2,14 +2,15 @@ div.domdiv {
     border-left: 1px solid red;
     background-color: #D3D3D3;
     color:#094f66;
+    margin-left: 20px;
 }
 div.domdiv.elid {
     font-size:10px;
 
 }
-/* div.domdiv:hover {
-    filter: brightness(95%);
-} */
+div.domdiv:hover {
+    filter: brightness(105%);
+} 
 span.sp {
     font-style: italic;
     font-size:15px;
@@ -21,8 +22,11 @@ span.sp:hover {
 div.proppre {    
     color:white;
     margin-left: 40px;
-    border: '1px solid blue';
+    /* border: '1px solid blue'; */
     background-color: #094f66;
+}
+div.element {
+    font-weight: 900;
 }
 /* div.proppre::before {
     font: var(--fa-font-regular);
@@ -31,7 +35,7 @@ div.proppre {
 div.proppre:hover {    
     background-color: #ADD8FF;
     color:black;
-    border: 1px solid blue;
+    /* border: 1px solid blue; */
 }
 .jsontext {
     background-color: #90EE90;
@@ -39,6 +43,5 @@ div.proppre:hover {
     border: 2px solid green;
 }
 .jsontext:hover {
-    padding: 10px;
-    background-color: white;
+    background-color: white;;
 }
