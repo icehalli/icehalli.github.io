@@ -78,6 +78,71 @@ class _JsonArrayToJson {
     }
 
 }
+class _Toolbar {
+    static toolbar = null;
+    static toolbarPlaceholder = null;
+    static toolbarHeight = 0;
+    static toolbarOpenHeight = 300;
+    static toggleAll = null;
+    static addDom = null;
+    static domText = null
+    static toolbarOpen = false;
+    static DomtextChanged = false;
+    static AppendToolbar(){
+        this.toolbar = _ParserHelpers.getElement('div', 'toolbar', null, '');
+        this.toolbarPlaceholder = _ParserHelpers.getElement('div', 'toolbarPlaceholder', null, '');
+        $('body').prepend(this.toolbar);
+        $('body').prepend(this.toolbarPlaceholder);
+         //TobbleAll
+         this.toggleAll = _ParserHelpers.getElement('button', 'toggleAll', null, '');
+         this.toggleAll.attr('type', 'button');
+         this.toggleAll.html('Toggle');
+         this.toggleAll.on('click', function(){
+             _ParserRenderer.allPropsVisible = !_ParserRenderer.allPropsVisible;
+             _ParserRenderer.ToggleAllProps(_ParserRenderer.allPropsVisible);
+         });
+         this.toolbar.append(this.toggleAll);
+         //Add dom
+         this.addDom = _ParserHelpers.getElement('button', 'addDom', null, '');
+         this.addDom.attr('type', 'button');
+         this.addDom.html('Add');
+         this.addDom.on('click', () => {
+            if(_Toolbar.DomtextChanged){
+                _Toolbar.DomtextChanged = false;
+                return;
+            }
+            this.toolbarOpen = !this.toolbarOpen;
+            this.toolbar.height(this.toolbarOpen ? this.toolbarOpenHeight : this.toolbarHeight);
+            this.ShowDomTextBox(this.toolbarOpen);
+         });
+         this.toolbar.append(this.addDom);
+
+        //textarea for dom
+        var domTextDiv  = _ParserHelpers.getElement('div', 'domTextDiv', null, '');
+        this.domText  = _ParserHelpers.getElement('textarea', 'domText', null, '');
+        this.domText.attr('rows', '30');
+        this.domText.attr('cols', '50');
+        this.domText.attr('placeholder', 'Paste html text here');
+        this.domText.css({display: 'none'});
+        this.domText.on('change', function() {
+            _Toolbar.DomtextChanged = true;
+            _Toolbar.ShowDomTextBox(false);
+            _Toolbar.toolbar.height(_Toolbar.toolbarHeight);
+            var domText = $(this).val();
+            _Parser.ParseAndRenderHtml(domText);
+        });
+        domTextDiv.append(this.domText);
+        this.toolbar.append(domTextDiv);
+        this.toolbarHeight = this.toolbar.height();
+        this.toolbarPlaceholder.height(this.toolbarHeight);
+     }
+     static ShowDomTextBox(show=true){
+        var d = show ? 'block' : 'none';
+        console.log('this.toolbarOpen'.toUpperCase(), show, this.toolbarOpen, d);
+        this.domText.css({display: d});
+        _Toolbar.toolbarOpen = show;
+     }
+}
 class _ParserRenderer {
     static includeWrapperid = false;
     static allPropsVisible = true;
@@ -85,34 +150,32 @@ class _ParserRenderer {
     static WrapperTag = 'div';
     static PropertyTag = 'div';
     static JsonArray = [];
+    static JsonArrayDiv = null;
+    static Initialize(){
+        _ParserRenderer.JsonArray = [];
+        _ParserRenderer.allPropsVisible = true;
+    }
     static Render(parsedResult, divToGet) {
         this.renderHtml(parsedResult, 0, divToGet);
         this.CloseTags();
         this.AddCollapse();
-        this.AddBorderEmphasis();
-        this.AppendToolbar();    
+        this.AddBorderEmphasis();  
         this.AppendJsonArray();
     }
     static AppendJsonArray(){
-        //debugger
+        console.log('AppendJsonArray', _ParserRenderer.JsonArray);
         var json = _JsonArrayToJson.getJson(_ParserRenderer.JsonArray);
-        var jsonarray = _ParserHelpers.getElement('div', 'jsonarray', null, '');
-        var jsonpre = _ParserHelpers.getElement('pre', 'jsonpre', null, '');
-        jsonpre.html(JSON.stringify(json, null, 2));
-        jsonarray.html(jsonpre);
-        $('body').append(jsonarray);
-    }
-    static AppendToolbar(){
-       var toolbar = _ParserHelpers.getElement('div', 'toolbar', null, '');
-        $('body').prepend(toolbar);
-        var toggleAll = _ParserHelpers.getElement('button', 'toggleAll', null, '');
-        toggleAll.attr('type', 'button');
-        toggleAll.html('Toggle');
-        toggleAll.on('click', function(){
-            _ParserRenderer.allPropsVisible = !_ParserRenderer.allPropsVisible;
-            _ParserRenderer.ToggleAllProps(_ParserRenderer.allPropsVisible);
-        });
-        toolbar.append(toggleAll);
+        if(this.JsonArrayDiv && this.JsonArrayDiv.length === 1)
+            this.JsonArrayDiv.empty();
+        else {
+            this.JsonArrayDiv = _ParserHelpers.getElement('div', 'jsonarray', null, '');
+            $('body').append(this.JsonArrayDiv);
+        }
+        if(_ParserRenderer.JsonArray.length > 0) {
+            var jsonpre = _ParserHelpers.getElement('pre', 'jsonpre', null, '');
+            jsonpre.html(JSON.stringify(json, null, 2));
+            this.JsonArrayDiv.html(jsonpre);
+        }
     }
     static renderHtml(item, indent=0, parent){
         var parent = this.AppendPre(item, parent);
@@ -135,7 +198,6 @@ class _ParserRenderer {
     }
 
     static ToggleProps($this, force){      
-        //debugger  
         var closed = $this.data('closed');        
         if(typeof force !== 'undefined') {
             closed = force ? 0 : 1;
@@ -166,9 +228,7 @@ class _ParserRenderer {
         elements.each((i, el) => {
             var j = $(el);
             var text = j.html();
-            //debugger
-            text = text.replace('&lt;', '&lt;/').replace('&#60;', '&#60;/');            
-            //var htmlEncoded = _ParserHelpers.encodeHtml(text);
+            text = text.replace('&lt;', '&lt;/').replace('&#60;', '&#60;/');   
             var domElement = _ParserHelpers.getElement(_ParserRenderer.ElementTag, 'element', null, 'element');
             domElement.append(text);
             j.parent().parent().append(domElement);
@@ -244,7 +304,6 @@ class _ParserRenderer {
             _ParserRenderer.JsonArray.push(content);
         var domDivLeaf = _ParserHelpers.getElement('div', 'jsontext', null, 'proppre');
         domDivLeaf.append(content);
-        //debugger
         parentEl.parent().append(domDivLeaf);
     }
     
@@ -279,7 +338,16 @@ class _Parser {
     static parsedResult = null;
     static divToGet = null;
 
+    static ParseAndRenderHtml(html, containerId) {
+        if(!containerId)
+            containerId = '#container';
+        if(containerId.indexOf('#') !== 0)
+            containerId = '#' + containerId;
+        $(containerId).html(html);
+        _Parser.ParseAndRender(containerId);
+    }
     static ParseAndRender(divToGet) {
+        _ParserRenderer.Initialize();
         this.Parse(divToGet);
         _ParserRenderer.Render(this.parsedResult, this.divToGet);
     }
