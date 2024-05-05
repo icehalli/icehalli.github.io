@@ -1,0 +1,22 @@
+.flex {
+    display: flex;
+  justify-content: flex-start;
+  /* flex-wrap: nowrap; 
+  padding:5px;
+  gap: 5px; */
+}
+.front{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.box {
+    flex: 1;
+    flex-grow: 1;
+}
+
+.task {
+    object-fit: cover;
+    max-width:200px;
+}

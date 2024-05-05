@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Layout pg</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="clearmargin.css" rel="stylesheet">
+<link href="gridpagelayout.css" rel="stylesheet">
+<link href="helpers.css" rel="stylesheet">
+<link href="contentscroll.css" rel="stylesheet">
+<link href="examples.css" rel="stylesheet">
+<link href="inputhide.css" rel="stylesheet">
+<link href="colors.css" rel="stylesheet">
+<link href="waves.css" rel="stylesheet">
+<link href="boxes.css" rel="stylesheet">
+<link href="page.css" rel="stylesheet">
+<link href="imageflex.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="container">
+        <div id="content-container" class="content-container">
+            <div class="front">
+                <input id="inp-hide" type="text" placeholder="Hvað gerðiru ?" />
+                <div id="container-img" class="container-img">
+                    <ul class="image-gallery">
+                        <li class="did" >
+                          <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
+                          <div class="overlay"><span></span></div>
+                        </li>
+                        <li class="did">
+                          <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
+                          <div class="overlay"><span></span></div>
+                        </li>
+                        <li class="did">
+                          <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
+                          <div class="overlay"><span></span></div>
+                        </li>
+                        <li class="did">
+                          <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
+                          <div class="overlay"><span></span></div>
+                        </li>
+                        <li class="did">
+                          <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
+                          <div class="overlay"><span></span></div>
+                        </li>
+                    </ul>
+                </div>    
+            </div>
+            <div class="rest">
+                
+            </div>          
+        </div>
+        <div class="flex flex--vertical top">
+            
+        </div>
+        <div class="flex footer">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div> 
+            
+        </div>
+        <div class="flex--vertical left">            
+            
+        </div>
+    </div>
+<script>
+// document.getElementById('settiivel').addEventListener('click', (e) => {
+//     console.log(e.target.innerText);
+// });
+
+function setup(){
+    setTimeout(() => {
+        setup2();        
+    }, 100);
+    return;
+    const el = document.getElementById('container-img');
+    console.log(el);
+    el.innerHTML = tmpl(getTodos());
+}
+
+function setup2(){
+    var todos = getTodos();
+    let els = document.getElementsByClassName('did');
+    for(let el of els){
+        const loaded = el.dataset.loaded;
+        if(!loaded){
+            el.dataset.loaded = true;
+            let img = el.querySelector('img');
+            let t = todos.shift();
+            img.src = t.img;
+            let span = el.querySelector('span');
+            span.innerHTML = t.do;
+            el.attributes.id = 'do-'+t.id;
+            el.addEventListener('click', (e) => {
+                console.log(e.target.innerText);
+            });
+        }
+    }
+}
+
+function getTodos(){
+    return [
+        {id:1, order:1, do:'Setti í vél', img:'https://source.unsplash.com/mAWTLZIjI8k'},
+        {id:2, order:2, do:'Fór út með Mosa', img:'https://source.unsplash.com/BmisHZUE750'},
+        {id:3, order:3, do:'Gaf Mosa að borða', img:'https://source.unsplash.com/RCDcigzmtII'},
+        {id:4, order:4, do:'Eldaði', img:'https://source.unsplash.com/APDMfLHZiRA'},
+        {id:5, order:5, do:'Gekk frá eftir mat', img:'https://source.unsplash.com/Q7YAlDm3xSo'},
+        {id:6, order:6, do:'Verslaði', img:'https://source.unsplash.com/QsYXYSwV3NU'},
+    ];
+}
+
+function tmpl(obs){
+    let lis = '';
+    for(let o of obs)
+        lis += tmpl2(o);
+    return `<ul class="image-gallery">
+              ${lis}      
+                </ul>`;
+}
+
+function tmpl2(ob){
+    return `<li id="do-${ob.id}" class="did">
+                <img src="${ob.img}" alt="" />
+                <div class="overlay"><span>${ob.do}</span></div>
+            </li>`;
+}
+setup();
+//document.getElementById('inp-hide').focus();
+
+//document.getElementById('inp').style.visibility = 'hidden';
+</script>
+</body>
+</html>

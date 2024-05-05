@@ -1,0 +1,38 @@
+
+.content-container {  
+    display: grid;
+    grid-template-columns: repeat(10, 10%);
+    grid-template-rows: repeat(9, 11.1%) 0.1%;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow-y: scroll;
+  }
+
+  
+.front {
+    grid-column: 1 / end;
+    grid-row: 1 / 10;  
+  
+  }
+  .rest {
+    grid-column: 1 / end;
+    grid-row: 10;  
+  }
+
+/*   
+.content-container {  
+  background-color:yellow;
+}
+
+
+.front {
+  background-color:blue;
+
+}
+.rest {
+  background-color:rgb(54, 54, 121);
+}
+
+
+   */
