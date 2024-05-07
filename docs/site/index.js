@@ -4,15 +4,18 @@ import { iDid, addItem, signOutUser, createUser, signInUser, getCurrentUser } fr
 const loginContainer = document.querySelector('#login');
 const mainContainer = document.querySelector('#main');
 
-let userEl = document.querySelector('#user');
+//let userEl = document.querySelector('#user');
 let signoutEl = document.querySelector('#signout');
 let overviewEl = document.querySelector('#overview');
+let mainviewEl = document.querySelector('#mainview');
+let userviewEl = document.querySelector('#userview');
 
 
 let login = document.querySelector('.login');
 let create = document.querySelector('.create');
 let container = document.querySelector('.container-login');
 let containerOverview = document.querySelector('#container-overview');
+let containerUser = document.querySelector('#container-user');
 let submit = document.querySelector('#submit');
 
 let password = document.querySelector('#password');
@@ -27,16 +30,25 @@ function showMain(){
     mainContainer.style.display = 'block';
     loginContainer.style.display = 'none';
     containerOverview.style.display = 'none';  
+    containerUser.style.display = 'none';  
 }
 function showLogin(){
     mainContainer.style.display = 'none';
     loginContainer.style.display = 'block';
     containerOverview.style.display = 'none';  
+    containerUser.style.display = 'none';  
 }
 function showOverview(){
     mainContainer.style.display = 'none';
     loginContainer.style.display = 'none';
+    containerUser.style.display = 'none';    
     containerOverview.style.display = 'block';    
+}
+function showUser(){
+    mainContainer.style.display = 'none';
+    loginContainer.style.display = 'none';
+    containerUser.style.display = 'block';    
+    containerOverview.style.display = 'none';    
 }
 
 // //data 
@@ -72,6 +84,7 @@ const textInput = document.getElementById('inp-hide');
     });
 
 //data events
+let fixedTodos = null;
 window.addEventListener("onTodos", (e) => {
     onTodos(e.detail);
 });
@@ -83,10 +96,21 @@ let allTodos = null;
 function onMyTodos(mytodos){
     allTodos = mytodos;
     console.log(allTodos);
+    var doing2 = document.getElementsByClassName('doing');
+    if(doing2.length > 0){
+        setTimeout(() => {
+            console.log('doings', doing2);
+            var span = doing2[0].querySelector('span');
+            span.innerHTML = span.dataset.text;
+            doing2[0].classList.remove('doing'); 
+        }, 1000);
+    }
+
 }
 
 
-function onTodos(todos) {
+function onTodos(todos) {    
+    fixedTodos = todos;
     if(todos && todos.data){
         console.log('onTodos', todos);
         var t = Object.keys(todos.data);
@@ -99,7 +123,9 @@ function onTodos(todos) {
 function addTodo(val){    
     let free = document.getElementsByClassName('free');
     if(free.length > 0){
-        var el = free[0];let span = el.querySelector('span');
+        var el = free[0];
+        let span = el.querySelector('span');
+        span.dataset.text = val;
         span.innerHTML = val;
         var imgUrl = getImage(val);
         if(imgUrl) {
@@ -112,7 +138,10 @@ function addTodo(val){
         }
         el.classList.remove('free');
         el.addEventListener('click', (e) => {
-            onIdid(e.target.innerHTML);
+            var data = e.target.querySelector('span').innerHTML;
+            e.target.classList.add('doing');
+            e.target.querySelector('span').innerHTML = "🔥 Vel gert";
+            onIdid(data);
         });
     }
     else{
@@ -207,18 +236,31 @@ signoutEl.onclick = function(){
 overviewEl.onclick = function(){
     overview();
 }
+mainviewEl.onclick = function(){
+    showMain();
+}
+userviewEl.onclick = function(){
+    showUser();
+}
 
 function overview(){
     showOverview();    
     var t = Object.keys(allTodos.data);
     for(let d of t){
-        var div = document.createElement('div');
         var f = allTodos.data[d];
-        var date = new Date(f.timestamp);
-        const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-        div.innerHTML = f.val + ' ' + formattedDate;
-        containerOverview.appendChild(div);  
+        if(f.user !== getCurrentUser().email)
+            continue;
+        addOverviewItem(f);
     }
+}
+
+function addOverviewItem(f){    
+    var div = document.createElement('div');
+    var date = new Date(f.timestamp);
+    const formattedDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+    const formattedTime = `${date.getHours()}:${(date.getMinutes()+'').padStart(2, '0')}`;
+    div.innerHTML = f.val + ' ' + formattedDate + ' ' + formattedTime;
+    containerOverview.appendChild(div);    
 }
 
 //auths
@@ -270,22 +312,25 @@ function onSigninFail(d){//oaisfdoi29090öas
 function onSignout(d){
     
 }
-function showUser(user){
-    userEl.innerHTML = user ? user.email : '';
+function setUser(user){
+    //userEl.innerHTML = user ? user.email : '';
     signoutEl.style.display = user ? 'block' : 'none';    
-    overviewEl.style.display = user ? 'block' : 'none';        
+    overviewEl.style.display = user ? 'block' : 'none'; 
+    mainviewEl.style.display = user ? 'block' : 'none'; 
+    userviewEl.style.display = user ? 'block' : 'none'; 
+    userviewEl.innerHTML = user ? user.email : '';
 }
 function onAuthchange(d){
     if(d.success){
         if(d.user){
             console.log('authin', d.user.email);
             showMain();
-            showUser(d.user);
+            setUser(d.user);
             //getTodos();
         }
         else
             showLogin();
-            showUser(d.user);
+            setUser(d.user);
     }
     else{
         console.log('authout:fail')
