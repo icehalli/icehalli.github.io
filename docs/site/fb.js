@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { child, getDatabase, ref, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { set, child, getDatabase, ref, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { updateProfile, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -27,10 +27,19 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
     const database = getDatabase(app)
 
     // === STORES ===
+    const users = ref(database, "users")
     const todos = ref(database, "todo")
     const mytodos = ref(database, "mytodo")
     
     //export function getTodos() {
+      onValue(users, (snapshot) => {
+        const data = snapshot.val();
+        // console.log(data);
+        const event = new CustomEvent("onUsers", { detail: {success: true, data: data} });
+        dispatchEvent(event);
+
+        // updateStarCount(postElement, data);
+      });
       onValue(todos, (snapshot) => {
         const data = snapshot.val();
         // console.log(data);
@@ -44,9 +53,6 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
         const data = snapshot.val();
         const event2 = new CustomEvent("onMyTodos", { detail: {success: true, data: data} });
         dispatchEvent(event2);
-        // console.log(data);
-        const event = new CustomEvent("onTodos", { detail: {success: true, data: data} });
-        dispatchEvent(event);
 
         // updateStarCount(postElement, data);
       });
@@ -61,6 +67,23 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
       //   console.error(error);
       // });
     //}
+
+    export function writeUserData(ob) {
+      console.log('update profile', getAuth().currentUser, ob);
+      updateProfile(getAuth().currentUser, ob).then((something) => {
+        console.log(something)
+        //const user = userCredentials.user;
+        const event = new CustomEvent("setUser", { detail: {success: true, user: something} });
+        dispatchEvent(event);
+        //console.log(user);
+        //return user;
+        //EmUsers[user.email].SeesHeIsCreated();
+      })
+      .catch((error) => {            
+        const event = new CustomEvent("setUser", { detail: {success: false, msg: error.message} });
+        dispatchEvent(event);
+      });
+    }
 
     ///data manip
     export function iDid(t){

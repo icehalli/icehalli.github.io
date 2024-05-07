@@ -1,9 +1,12 @@
 
-import { iDid, addItem, signOutUser, createUser, signInUser, getCurrentUser } from "./fb.js"
+import { writeUserData, iDid, addItem, signOutUser, createUser, signInUser, getCurrentUser } from "./fb.js"
 
 const loginContainer = document.querySelector('#login');
 const mainContainer = document.querySelector('#main');
 
+let UserNameInput = document.querySelector('#user-name')
+UserNameInput.addEventListener(`focus`, () => UserNameInput.select());
+let UserSubmit = document.querySelector('#submit-user');
 //let userEl = document.querySelector('#user');
 let signoutEl = document.querySelector('#signout');
 let overviewEl = document.querySelector('#overview');
@@ -24,7 +27,9 @@ let username = document.querySelector('#username');
 let email = document.querySelector('#email');
 
 let loginemail = document.querySelector('#loginemail');
+loginemail.addEventListener(`focus`, () => loginemail.select());
 let loginpassword = document.querySelector('#loginpassword');
+loginpassword.addEventListener(`focus`, () => loginpassword.select());
 
 function showMain(){
     mainContainer.style.display = 'block';
@@ -48,7 +53,9 @@ function showUser(){
     mainContainer.style.display = 'none';
     loginContainer.style.display = 'none';
     containerUser.style.display = 'block';    
-    containerOverview.style.display = 'none';    
+    containerOverview.style.display = 'none'; 
+    console.log(CURRENTUSER);   
+    UserNameInput.value = CURRENTUSER.displayName;
 }
 
 // //data 
@@ -58,14 +65,16 @@ function showUser(){
 //   });
 //input way
 
+let CURRENTUSER = null;
 const textInput = document.getElementById('inp-hide');
     textInput.addEventListener('keydown', (event) => {
         
       if (event.key === 'Enter') {
         let userId = 'anonymous';
-        let user = getCurrentUser();
-        if(user)
-            userId = user.email;
+        CURRENTUSER = getCurrentUser();
+        console.log('user', CURRENTUSER);
+        if(CURRENTUSER)
+            userId = CURRENTUSER.email;
         else{
             showLogin();
             return;
@@ -84,6 +93,9 @@ const textInput = document.getElementById('inp-hide');
     });
 
 //data events
+window.addEventListener("onUsers", (e) => {
+    onUsers(e.detail);
+});
 let fixedTodos = null;
 window.addEventListener("onTodos", (e) => {
     onTodos(e.detail);
@@ -100,14 +112,17 @@ function onMyTodos(mytodos){
     if(doing2.length > 0){
         setTimeout(() => {
             console.log('doings', doing2);
-            var span = doing2[0].querySelector('span');
-            span.innerHTML = span.dataset.text;
+            //var span = doing2[0].querySelector('span');
+            //span.innerHTML = span.dataset.text;
             doing2[0].classList.remove('doing'); 
         }, 1000);
     }
 
 }
 
+function onUsers(users) {
+    console.log('onUsers', users);
+}
 
 function onTodos(todos) {    
     fixedTodos = todos;
@@ -138,9 +153,11 @@ function addTodo(val){
         }
         el.classList.remove('free');
         el.addEventListener('click', (e) => {
-            var data = e.target.querySelector('span').innerHTML;
-            e.target.classList.add('doing');
-            e.target.querySelector('span').innerHTML = "🔥 Vel gert";
+            console.log(e.currentTarget);
+            var data = e.currentTarget.querySelector('span').innerHTML;
+            // e.currentTarget.classList.add('blinking');
+            // e.currentTarget.querySelector('span').innerHTML = "🔥 Vel gert";
+            pushNotify(data);
             onIdid(data);
         });
     }
@@ -148,6 +165,19 @@ function addTodo(val){
         appendTodo(val);
     }
 }
+
+function pushNotify(data, title = "🔥 Vel gert", status = null) {//'error', 'warning', 'success', 'info'
+    if(status === 'error')
+        data = data.replace('Firebase: ', '');
+        let f = {};
+        if(status === 'error')
+            f.status = status;
+        f.title = title;
+        f.text = data;
+        f.autotimeout = status === 'error' ? 5000 : 500;
+        
+        new Notify(f);
+  }
 
 function onIdid(val){    
     let userId = 'anonymous';
@@ -185,7 +215,7 @@ function appendTodo(val){
     newDiv.appendChild(div);
     
     newDiv.addEventListener('click', (e) => {
-        onIdid(e.target.innerHTML);
+        onIdid(e.currentTarget.innerHTML);
     });
     
     document.getElementById('image-gallery').appendChild(newDiv);
@@ -217,6 +247,15 @@ login.onclick = function(){
     container.classList.add('signinForm');
 }
 
+UserSubmit.onclick = function(){
+    var name = UserNameInput.value;
+    var ob ={
+        displayName: name
+      };
+    writeUserData(ob);
+
+}
+
 create.onclick = function(){
     container.classList.remove('signinForm');
 }
@@ -243,15 +282,115 @@ userviewEl.onclick = function(){
     showUser();
 }
 
+function groupOverViewData(data){
+    var res = {};
+    if(data) {
+        var t = Object.keys(data);
+        for(let d of t){
+            var f = data[d];
+            if(f.user !== getCurrentUser().email)
+                continue;
+            var date = new Date(f.timestamp);
+            var year = date.getFullYear().toString();
+            var month = MonthName((date.getMonth() + 1).toString());
+            var dayofmonth = date.getDate().toString();
+            var time = `${(date.getHours() + '').padStart(2, '0')}:${(date.getMinutes()+'').padStart(2, '0')}`
+            if(!res[year])
+                res[year] = {};
+            if(!res[year][month])
+                res[year][month] = {};
+            if(!res[year][month][dayofmonth])
+                res[year][month][dayofmonth] = [];
+            f.time = time;
+            res[year][month][dayofmonth].push({time: f.time, val: f.val});
+            // const formattedDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+            // const formattedTime = `${date.getHours()}:${(date.getMinutes()+'').padStart(2, '0')}`;
+            
+        }    
+    }
+        console.log('groupOverViewData', res);
+    
+    renderOverview(res);
+
+}
+
+function renderOverview(res){
+    containerOverview.innerHTML = '';
+    var header = document.createElement('h2');
+    header.innerHTML = 'Overview'
+    containerOverview.appendChild(header);
+    var obs = Object.keys(res);
+    if(obs.length === 0) {
+        containerOverview.appendChild(getbr('You lazy little...grrr'))
+        return;
+    }
+    for(let y of obs) {
+        addYear(y, res[y]);
+    }
+}
+function addYear(key, res){
+    containerOverview.appendChild(getbr(key))
+    var obs = Object.keys(res);
+    for(let y of obs) {
+        addMonth(y, res[y]);
+    }
+}
+function addMonth(key, res){
+    //containerOverview.appendChild(getbr(key, 10))
+    var obs = Object.keys(res);
+    for(let y of obs) {
+        addDays(y, key, res[y]);
+    }
+}
+function addDays(d, m, res){
+    containerOverview.appendChild(getbr(d + '.' + m, 20))
+    var el = document.createElement('hr');
+    containerOverview.appendChild(el);
+    var obs = Object.keys(res);
+    for(let y of obs) {
+        addTimes(y, res[y]);
+    }
+}
+
+function getbr(inner, padding=0){
+    var el = document.createElement('div');
+    el.style.paddingLeft = padding + 'px';
+    el.innerHTML = inner;
+    return el;
+}
+function addTimes(key, res){
+    containerOverview.appendChild(getbr(res.time + ' ' + res.val, 20))
+    // containerOverview.appendChild(getbr(res.time))
+    // containerOverview.appendChild(getbr(res.val, 10))
+}
+function MonthName(i){
+    const ms = {
+        '1':'Jan',
+        '2':'Feb',
+        '3':'Mar',
+        '4':'Apr',
+        '5':'Maí',
+        '6':'Jún',
+        '7':'Júl',
+        '8':'Ágú',
+        '9':'Sep',
+        '10':'Okt',
+        '11':'Nóv',
+        '12':'Des'
+    }
+    return ms[i+''];
+}
+
 function overview(){
     showOverview();    
-    var t = Object.keys(allTodos.data);
-    for(let d of t){
-        var f = allTodos.data[d];
-        if(f.user !== getCurrentUser().email)
-            continue;
-        addOverviewItem(f);
-    }
+    var res = groupOverViewData(allTodos.data);
+    // var t = Object.keys(allTodos.data);
+    // for(let d of t){
+    //     var f = allTodos.data[d];
+    //     if(f.user !== getCurrentUser().email)
+    //         continue;
+    //     addOverviewItem(f);
+    // }
 }
 
 function addOverviewItem(f){    
@@ -281,13 +420,21 @@ window.addEventListener("createUser", (e) => {
     onCreateuser(e.detail);
 });
 
+window.addEventListener("setUser", (e) => {
+    if(e.detail.success)
+        pushNotify('Vistað', 'Flott', 'Info');
+    else
+        pushNotify(e.detail.msg, 'Ekki vistað', 'error');
+    console.log('setuser:listener', e.detail);
+});
+
 function onCreateuser(d){
     if(d.success){
         console.log('success');
         container.classList.add('signinForm');
     }
     else{
-        console.log(d.msg);
+        pushNotify(d.msg, 'Obbosí', 'error');
     }
 }
 
@@ -296,7 +443,7 @@ function onSignin(d){//oaisfdoi29090öas
         onSigninSuccess(d.user);
     }
     else{
-        onSigninFail(d.msg)
+        pushNotify(d.msg, 'Obbosí', 'error');
     }
 }
 
@@ -313,12 +460,13 @@ function onSignout(d){
     
 }
 function setUser(user){
+    CURRENTUSER = user;
     //userEl.innerHTML = user ? user.email : '';
     signoutEl.style.display = user ? 'block' : 'none';    
     overviewEl.style.display = user ? 'block' : 'none'; 
     mainviewEl.style.display = user ? 'block' : 'none'; 
     userviewEl.style.display = user ? 'block' : 'none'; 
-    userviewEl.innerHTML = user ? user.email : '';
+    userviewEl.innerHTML = user ? 'Ég' : '';
 }
 function onAuthchange(d){
     if(d.success){
