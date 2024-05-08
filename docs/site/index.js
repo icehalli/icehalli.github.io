@@ -317,7 +317,7 @@ function groupOverViewData(data){
 function renderOverview(res){
     containerOverview.innerHTML = '';
     var header = document.createElement('h2');
-    header.innerHTML = 'Overview'
+    header.innerHTML = 'Yfirlit'
     containerOverview.appendChild(header);
     var obs = Object.keys(res);
     if(obs.length === 0) {
@@ -466,7 +466,7 @@ function setUser(user){
     overviewEl.style.display = user ? 'block' : 'none'; 
     mainviewEl.style.display = user ? 'block' : 'none'; 
     userviewEl.style.display = user ? 'block' : 'none'; 
-    userviewEl.innerHTML = user ? 'Ég' : '';
+    //userviewEl.innerHTML = user ? 'Ég' : '';
 }
 function onAuthchange(d){
     if(d.success){

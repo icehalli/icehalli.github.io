@@ -10,8 +10,12 @@
   } */
 
 .btn{
+  /* background-color: #cf245f;
+  background-image: linear-gradient(to bottom right, #fcd34d, #ef4444, #ec4899); */
+  /* background-color: #cf245f;
+  background-image: linear-gradient(to bottom right, rgba(255,25,25,1), rgba(101,0,94,1), rgba(255,25,25,1)); */
   background-color: #cf245f;
-  background-image: linear-gradient(to bottom right, #fcd34d, #ef4444, #ec4899);
+  background-image: linear-gradient(to bottom right, rgba(255,25,25,1), #ef4444, rgba(255,25,25,1));
   border: 0;
   border-radius: .25rem;
   box-sizing: border-box;
@@ -34,6 +38,7 @@
 
 .top{
   justify-content: space-evenly;
+  background-color:#223243;
 }
 @media (max-width: 824px) {
   .btn {
