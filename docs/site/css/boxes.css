@@ -64,3 +64,13 @@ box-shadow: inset 0px 0px 74px 18px rgba(219,192,20,1);
     width:100%;
     color:white;
   }
+
+  .overview-time{
+    padding-left:20px;
+  }
+  .overview-day{
+    background-color: #223243;
+  }
+  .overview-year {
+    text-align: center;
+  }

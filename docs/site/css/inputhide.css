@@ -6,6 +6,10 @@
     background-color:transparent;
     
 }
+#inp-hide:focus {
+    background-color:blue;
+    
+}
 
 #inp-hide::placeholder {
     color: white;

@@ -8,6 +8,15 @@ import { updateProfile, getAuth, createUserWithEmailAndPassword, signInWithEmail
 // import { dispSysAction, dispSysError, SysShow, GetSysEvents, System } from "./dispatcher.js";
 // import { SystemLog, ErrorLog } from './log.js'
 
+if(window['mock']) {
+
+}
+else {
+ // setup();
+}
+
+
+//function setup() {
 // === SETUP ===
 //export function Backend() {
     //const SysEvents = GetSysEvents();
@@ -29,7 +38,7 @@ import { updateProfile, getAuth, createUserWithEmailAndPassword, signInWithEmail
     // === STORES ===
     const users = ref(database, "users")
     const todos = ref(database, "todo")
-    const mytodos = ref(database, "mytodo")
+    //const mytodos = ref(database, "mytodo")
     
     //export function getTodos() {
       onValue(users, (snapshot) => {
@@ -49,51 +58,96 @@ import { updateProfile, getAuth, createUserWithEmailAndPassword, signInWithEmail
         // updateStarCount(postElement, data);
       });
 
-      onValue(mytodos, (snapshot) => {
-        const data = snapshot.val();
-        const event2 = new CustomEvent("onMyTodos", { detail: {success: true, data: data} });
-        dispatchEvent(event2);
+      // onValue(mytodos, (snapshot) => {
+      //   const data = snapshot.val();
+      //   const event2 = new CustomEvent("onMyTodos", { detail: {success: true, data: data} });
+      //   dispatchEvent(event2);
 
-        // updateStarCount(postElement, data);
-      });
-
-      // get(child(database, `todo`)).then((snapshot) => {
-      //   if (snapshot.exists()) {
-      //     console.log(snapshot.val());
-      //   } else {
-      //     console.log("No data available");
-      //   }
-      // }).catch((error) => {
-      //   console.error(error);
+      //   // updateStarCount(postElement, data);
       // });
-    //}
+      
+            //dont know how to export this
+    onAuthStateChanged(auth, (user) => {
+      console.log('onAuthStateChanged', user) 
+          const event = new CustomEvent("onAuthStateChanged", { detail: {success: true, user: user} });
+          dispatchEvent(event);
+          return;
+      if (user) {
+          const email = user.email;    
+          //System.showsLoggedInView(email)
+          // if(EmUsers[email]){
+          //     EmUsers[email].SeesHeIsSignedIn();
+          // }
+      } else {
+          //System.showsLoggedInFailed()
+          // var key = Object.keys(EmUsers);
+          // if(key.length > 0)
+          //     EmUsers[key[0]].SeesHeIsSignedOut();
+      }
+    })
 
-    export function writeUserData(ob) {
+  //  }
+
+  function refToCurrUserTodos(){
+    return ref(database, "mytodo/" + getCurrentUser().uid);
+  }
+
+
+  export function getHistory(){
+    get(refToCurrUserTodos()).then((snap) => {
+      console.log('mytodos', snap.val());
+      const event = new CustomEvent("getHistory", { detail: {success: true, data: snap.val()} });
+      dispatchEvent(event);
+    })
+  }
+  
+  export function getFixedActions(){
+    get(todos).then((snap) => {
+      console.log('todos', snap.val()); 
+      const event = new CustomEvent("getFixedActions", { detail: {success: true, data: snap.val()} });
+      dispatchEvent(event);
+    })
+  }
+
+    export function writeUserData(input) {
+      const ob = input.data;
+      const callBack = input.cb;
       console.log('update profile', getAuth().currentUser, ob);
       updateProfile(getAuth().currentUser, ob).then((something) => {
         console.log(something)
         //const user = userCredentials.user;
-        const event = new CustomEvent("setUser", { detail: {success: true, user: something} });
+        const event = new CustomEvent(callBack.success.cb, { detail: {success: true, user: user, cb: callBack} });
         dispatchEvent(event);
+        // dispatchEvent(new CustomEvent('FB:GLOBAL', { detail: {success: true, user: user, cb: callBack}}));
         //console.log(user);
         //return user;
         //EmUsers[user.email].SeesHeIsCreated();
       })
       .catch((error) => {            
-        const event = new CustomEvent("setUser", { detail: {success: false, msg: error.message} });
-        dispatchEvent(event);
+        const event2 = new CustomEvent(callBack.fail.cb, { detail: {success: false, user: null, msg: error.message, cb: callBack} });
+        dispatchEvent(event2);
+        // dispatchEvent(new CustomEvent('FB:GLOBAL', { detail: {success: false, user: null, msg: error.message, cb: callBack}}));
+        // const event = new CustomEvent("setUser", { detail: {success: false, msg: error.message} });
+        // dispatchEvent(event);
       });
     }
 
     ///data manip
-    export function iDid(t){
-      console.log('iDid', t)
-      push(mytodos, t)
+    export function iDid(input) {
+      const ob = input.data;
+      const callBack = input.cb;
+      console.log('iDid', ob)
+      // const ob = {}
+      // ob[t.uid] = t;
+      push(refToCurrUserTodos(), ob)
         .then((snap) => {
-          return snap.key;
+          const event = new CustomEvent(callBack.success.cb, { detail: {success: true, snap: snap, cb: callBack} });
+          dispatchEvent(event);
         })
-        .then((key) => {
-          console.log('iDid', key);
+        .catch((error) => {   
+          console.log('iDid', key);     
+          const event2 = new CustomEvent(callBack.fail.cb, { detail: {success: false, msg: error.message, cb: callBack} });
+          dispatchEvent(event2);
           //removeItem(key);
           //getItem(key);
         });
@@ -116,26 +170,7 @@ import { updateProfile, getAuth, createUserWithEmailAndPassword, signInWithEmail
     export function getCurrentUser(){
       return getAuth().currentUser;
     }
-            //dont know how to export this
-    onAuthStateChanged(auth, (user) => {
-        console.log('onAuthStateChanged', user) 
-            const event = new CustomEvent("onAuthStateChanged", { detail: {success: true, user: user} });
-            dispatchEvent(event);
-            return;
-        if (user) {
-            const email = user.email;    
-            //System.showsLoggedInView(email)
-            // if(EmUsers[email]){
-            //     EmUsers[email].SeesHeIsSignedIn();
-            // }
-        } else {
-            //System.showsLoggedInFailed()
-            // var key = Object.keys(EmUsers);
-            // if(key.length > 0)
-            //     EmUsers[key[0]].SeesHeIsSignedOut();
-        }
-      })
-
+    
     async function createUser(email, password) {
       //SystemLog('backend', 'createUser', email, password)
         createUserWithEmailAndPassword(auth, email, password)

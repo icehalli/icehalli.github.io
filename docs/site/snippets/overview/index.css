@@ -1,0 +1,16 @@
+
+.container-overview {
+  font-size:1.5rem;
+  width:100%;
+  color:white;
+}
+
+.overview-time{
+  padding-left:20px;
+}
+.overview-day{
+  background-color: #223243;
+}
+.overview-year {
+  text-align: center;
+}

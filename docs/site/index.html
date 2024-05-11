@@ -2,7 +2,9 @@
 <html>
 <head>
 <title>Mosinn</title>
+<script src="mocks.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="snippets.css" rel="stylesheet">
 <link href="css/clearmargin.css" rel="stylesheet">
 <link href="css/gridpagelayout.css" rel="stylesheet">
 <link href="css/helpers.css" rel="stylesheet">
@@ -18,136 +20,72 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="css/signup.css"><!-- CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.css" />
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" />
+<style>
+    .fade-in { animation: fadeIn 3s; }
+</style>
 </head>
 <body>
     <div class="container">
         <div id="content-container" class="content-container">
             <div class="front">
-                <div id="main" style="display:none">
-                  <input id="inp-hide" type="text" placeholder="Hvað gerðiru ?" />
-                  <div id="container-img" class="container-img">
-                      <ul id="image-gallery" class="image-gallery">
-                          <li class="did free">
-                            <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
-                            <div class="overlay"><span></span></div>
-                          </li>
-                          <li class="did free">
-                            <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
-                            <div class="overlay"><span></span></div>
-                          </li>
-                          <li class="did free">
-                            <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
-                            <div class="overlay"><span></span></div>
-                          </li>
-                          <li class="did free">
-                            <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
-                            <div class="overlay"><span></span></div>
-                          </li>
-                          <li class="did free">
-                            <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
-                            <div class="overlay"><span></span></div>
-                          </li>
-                          <li class="did free">
-                            <img src="https://source.unsplash.com/jf1EomjlQi0" alt="" />
-                            <div class="overlay"><span></span></div>
-                          </li>
-                      </ul>
-                  </div>  
+                <div id="overview"
+                    data-auth="true"
+                    title="Yfirlit"
+                    data-fa="clock-rotate-left"
+                    data-snippet="snippet" 
+                    data-trigger="getOverview"
+                    data-after="login">
                 </div>
-                <!-- signin -->
-                <div id="login" class="container-login" style="display:none">
-                  <div class="form signup">
-                    <h2>Nýskráning</h2>
-                    <div class="inputBox" style="display:none">
-                        <input id="username" type="text" required="required">
-                        <i class="fa-regular fa-user"></i>
-                        <span>notendanafn</span>
-                    </div>
-                    <div class="inputBox">
-                        <input id="email" type="text" required="required">
-                        <i class="fa-regular fa-envelope"></i>
-                        <span>netfang</span>
-                    </div>
-                    <div class="inputBox">
-                        <input id="password" type="password" required="required">
-                        <i class="fa-solid fa-lock"></i>
-                        <span>lykilorð</span>
-                    </div>
-                    <div class="inputBox" style="display:none">
-                        <input id="password2" type="password" required="required">
-                        <i class="fa-solid fa-lock"></i>
-                        <span>staðfesta lykilorð</span>
-                    </div>
-                    <div class="inputBox">
-                        <input id="submit" type="submit" value="Stofna aðgang">
-                    </div>
-                    <p>Þegar notandi ? <a href="#" class="login">Innskrá</a></p>
+                <div id="login2" 
+                    title="login2"
+                    data-snippet="snippet"
+                    data-after="signout">
                 </div>
-                
-                <div class="form signin">
-                    <h2>Innskráning</h2>
-                    <div class="inputBox">
-                        <input id="loginemail" type="text" required="required">
-                        <i class="fa-regular fa-user"></i>
-                        <span>netfang</span>
-                    </div>
-                    <div class="inputBox">
-                        <input id="loginpassword" type="password" required="required">
-                        <i class="fa-solid fa-lock"></i>
-                        <span>Lykilorð</span>
-                    </div>
-                    <div class="inputBox">
-                        <input id="loginsubmit" type="submit" value="Skrá inn">
-                    </div>
-                    <p>Ekki skráð(ur) ? <a href="#" class="create">Stofna aðgang</a></p>
+                <div id="signup2"
+                    data-snippet="snippet">
                 </div>
+                <div id="selector"
+                    data-auth="true"
+                    title="Gera"
+                    data-fa="shoe-prints"
+                    data-snippet="snippet"
+                    data-trigger="getSelector">
                 </div>
-                <!-- overview                     -->
-                <div id="container-overview" class="container-overview" style="display:none">
-                    <h2>Yfirlit</h2>
+                <div id="user"
+                    data-auth="true"
+                    title="User"
+                    data-fa="user"
+                    data-snippet="snippet"
+                    data-trigger="getUser">
                 </div>
-                <!-- user                     -->
-                <div id="container-user" class="container-user" style="display:none">
-                    <div class="form signup">
-                        <h2>Notandi</h2>
-                        <div class="inputBox">
-                            <input id="user-name" type="text" required="required">
-                            <i class="fa-regular fa-user"></i>
-                            <span>Nafn</span>
-                        </div>
-                        <div class="inputBox" style="display:none">
-                            <input id="email" type="text" required="required">
-                            <i class="fa-regular fa-envelope"></i>
-                            <span>email address</span>
-                        </div>
-                        <div class="inputBox" style="display:none">
-                            <input id="password" type="password" required="required">
-                            <i class="fa-solid fa-lock"></i>
-                            <span>create password</span>
-                        </div>
-                        <div class="inputBox" style="display:none">
-                            <input id="password2" type="password" required="required">
-                            <i class="fa-solid fa-lock"></i>
-                            <span>confirm password</span>
-                        </div>
-                        <div class="inputBox">
-                            <input id="submit-user" type="submit" value="Vista">
-                        </div>
-                    </div>
-
+                <div id="usersection"
+                    data-auth="true"
+                    title="us"
+                    data-disabled="true"
+                    data-snippet="snippet"
+                    data-fa="pen"
+                    data-trigger="getUserSection">
                 </div>
+                <div id="signout"
+                    data-auth="true"
+                    title="Out"
+                    data-fa="arrow-right-from-bracket"
+                    data-snippet="snippet"
+                    data-trigger="getSignout">
+                </div>
+                <div id="load"
+                    title="load"
+                    data-snippet="snippet"
+                    data-trigger="onLoad">
+                </div>
+                                  
             </div>
             <div class="rest">
                 
             </div>          
         </div>
-        <div class="flex top">
-            <!-- <div id="user" style="color:white"></div> -->
-            <button id="overview" class="btn" type="button" style="display:none"><i class="fa-solid fa-clock-rotate-left"></i></button>
-            <button id="mainview" class="btn" type="button" style="display:none"><i class="fa-solid fa-shoe-prints"></i></button>
-            <button id="userview" class="btn" type="button" style="display:none"><i class="fa-regular fa-user"></i></button>
-            <button id="signout" class="btn" type="button" style="display:none"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+        <div id="top" class="flex top">
         </div>
         <div class="flex footer">
             <div class="wave"></div>
@@ -159,7 +97,6 @@
             
         </div>
     </div>
-    <script>console.log('sdf')</script>
     <script src="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.min.js"></script>
     <script src="./index.js" type="module"></script>
 <script>

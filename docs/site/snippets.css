@@ -1,0 +1,8 @@
+.snippet-load {
+    border: 2px solid red;
+}
+.snippet-identify {
+    border: 2px solid green;
+    height: 100px;
+    width: 100px;
+}
