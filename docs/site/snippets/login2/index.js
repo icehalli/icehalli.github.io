@@ -3,13 +3,24 @@ window.snippPool.LOGIN2 = (function () {
     let submit;    
     let password;
     let email;
+    let create;
     function setup(){
+        console.log('koma svo')
         //private
         submit = document.querySelector('#loginsubmit');
         password = document.querySelector('#loginpassword');
+        password.addEventListener(`focus`, () => password.select());
         email = document.querySelector('#loginemail');
+        email.addEventListener(`focus`, () => email.select());
+        create = document.querySelector('.create');
+
+        create.onclick = function(){
+            console.log('stofnandd')
+            sendEvent('tosignup', {})
+        }
 
         submit.onclick = function(){
+            console.log('wtf')
             // {email: 'kk@kk.is', password: 'kkkkis123'}
             sendEvent('login', {email: email.value, password: password.value})
             //createUser(email.value, password.value);
@@ -25,7 +36,7 @@ window.snippPool.LOGIN2 = (function () {
         //console.log(evtName, data)
     }
     function sendEvent(evtName, data){
-        dispatchEvent(new CustomEvent('LOGIN2:' + evtName, { detail: data }));
+        dispatchEvent(new CustomEvent('SIGNUP2:' + evtName, { detail: data }));
         //outside listener for e.g. onElementClick
     }
 

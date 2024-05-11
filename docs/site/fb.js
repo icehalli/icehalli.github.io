@@ -123,9 +123,8 @@ else {
         //return user;
         //EmUsers[user.email].SeesHeIsCreated();
       })
-      .catch((error) => {            
-        const event2 = new CustomEvent(callBack.fail.cb, { detail: {success: false, user: null, msg: error.message, cb: callBack} });
-        dispatchEvent(event2);
+      .catch((error) => {
+        dispatchEvent(new CustomEvent(callBack.fail.cb, { detail: {success: false, user: null, msg: error.message, cb: callBack} }));
         // dispatchEvent(new CustomEvent('FB:GLOBAL', { detail: {success: false, user: null, msg: error.message, cb: callBack}}));
         // const event = new CustomEvent("setUser", { detail: {success: false, msg: error.message} });
         // dispatchEvent(event);
@@ -171,20 +170,19 @@ else {
       return getAuth().currentUser;
     }
     
-    async function createUser(email, password) {
+    async function createUser(input) {
+      const ob = input.data;
+      const callBack = input.cb;
       //SystemLog('backend', 'createUser', email, password)
-        createUserWithEmailAndPassword(auth, email, password)
+        createUserWithEmailAndPassword(auth, ob.email, ob.password)
           .then((userCredentials) => {
             const user = userCredentials.user;
-            const event = new CustomEvent("createUser", { detail: {success: true, user: user} });
-            dispatchEvent(event);
-            console.log(user);
+            dispatchEvent(new CustomEvent(callBack.success.cb, { detail: {success: true, user: user, cb: callBack} }));
             //return user;
             //EmUsers[user.email].SeesHeIsCreated();
           })
-          .catch((error) => {            
-            const event = new CustomEvent("createUser", { detail: {success: false, msg: error.message} });
-            dispatchEvent(event);
+          .catch((error) => {      
+            dispatchEvent(new CustomEvent(callBack.fail.cb, { detail: {success: false, user: null, msg: error.message, cb: callBack} }));
           })
         }
 

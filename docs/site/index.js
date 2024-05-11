@@ -10,6 +10,21 @@ loadSnippets({
 
 let loginOnload = false;
 
+function checkLogoutForce(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const logout = urlParams.get('logout');
+    if(logout) {
+        pushNotify('Forced logout');
+        console.log('will log out');
+        signOutUser();
+        setTimeout(() => {
+            window.location.href = window.location.href.split('?')[0];
+            
+        }, 1000);
+    }
+}
+checkLogoutForce();
+
     window.addEventListener("onAuthStateChanged", (e) => {
         if(e.detail.user){
             //pushNotify('logged in');
@@ -32,6 +47,7 @@ let loginOnload = false;
     
     window.addEventListener("SIGNUP2:createUser", (e) => {
         console.log("SIGNUP2:createUser", e.detail);
+        createUser(e.detail)
     });
     window.addEventListener("USER:saveUser", (e) => {
         console.log("USER:saveUser", e.detail);
@@ -84,6 +100,10 @@ let loginOnload = false;
 
 
     
+    
+    window.addEventListener("SIGNUP2:tosignup", (e) => {
+        triggerSnippet('signup2', 'id')
+    });
     
     window.addEventListener("LOGIN2:login", (e) => {
         console.log("LOGIN2:login", e.detail);
