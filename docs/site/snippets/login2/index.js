@@ -36,7 +36,7 @@ window.snippPool.LOGIN2 = (function () {
         //console.log(evtName, data)
     }
     function sendEvent(evtName, data){
-        dispatchEvent(new CustomEvent('SIGNUP2:' + evtName, { detail: data }));
+        dispatchEvent(new CustomEvent('LOGIN2:' + evtName, { detail: data }));
         //outside listener for e.g. onElementClick
     }
 
