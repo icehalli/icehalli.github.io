@@ -141,127 +141,116 @@ box-shadow: 0px 0px 77px 0px rgba(223,180,240,1);
     return this;
 }
 
-
-class DayPeriod {
-    constructor(name, interval = 1000, start) {// start= null, '00:00', or date
-        this.currentTime = new Date();
-        if(start){
-            if(typeof start === 'string'){
-                this.currentTime = TimeHelpers.toTime(start);
-            }
-            else{
-                this.currentTime = start;
-            }
+// DayPeriod
+function DayPeriod(name, interval, start) {
+    if (interval === undefined) interval = 1000; // default value for interval
+    this.currentTime = new Date();
+    if (start) {
+        if (typeof start === 'string') {
+            this.currentTime = TimeHelpers.toTime(start);
+        } else {
+            this.currentTime = start;
         }
-        this.name = name;
-        this.interval = interval;
-        this.startInterval();
-    }    
-
-    startInterval() {
-        if(!this.interval || this.interval < 1){
-            return;
-        }
-        setInterval(() => {
-            this.currentTime = new Date(this.currentTime.getTime() + 1000);
-            // console.log(this.currentTime);
-            // let time = this.getTime();
-            // this.showTime(time);
-        }, this.interval);        
     }
-    
-    getTime(){
-        return this.currentTime;
-    }
+    this.name = name;
+    this.interval = interval;
+    this.startInterval();
 }
 
-class Logger {
-    static on = false;
-    static Log(message){
-        if(!this.on)
-            return;
-        console.log(JSON.parse(JSON.stringify(arguments)));
+DayPeriod.prototype.startInterval = function() {
+    if (!this.interval || this.interval < 1) {
+        return;
     }
-}
+    var self = this;
+    setInterval(function() {
+        self.currentTime = new Date(self.currentTime.getTime() + 1000);
+        // console.log(self.currentTime);
+        // let time = self.getTime();
+        // self.showTime(time);
+    }, this.interval);
+};
 
-class TimeHelpers {    
-    static getTimeArr(decimalTime, hourMinSplitter = ':'){        
-        let s = decimalTime + '';
-        let sArr = s.split(hourMinSplitter);
-        let h = parseInt(sArr[0]);
-        let m = 0;
-        if(sArr.length > 1){
+DayPeriod.prototype.getTime = function() {
+    return this.currentTime;
+};
+
+var TimeHelpers = {
+    getTimeArr: function(decimalTime, hourMinSplitter) {
+        if (hourMinSplitter === undefined) hourMinSplitter = ':';
+        var s = decimalTime + '';
+        var sArr = s.split(hourMinSplitter);
+        var h = parseInt(sArr[0]);
+        var m = 0;
+        if (sArr.length > 1) {
             m = parseInt(sArr[1]);
         }
         return [h, m];
-    }
+    },
 
-    static toTime(h, hourMinSplitter = ':') {// h = '1:30'
-        let timeArr = this.getTimeArr(h, hourMinSplitter);
-        let time = new Date();
+    toTime: function(h, hourMinSplitter) { // h = '1:30'
+        if (hourMinSplitter === undefined) hourMinSplitter = ':';
+        var timeArr = this.getTimeArr(h, hourMinSplitter);
+        var time = new Date();
         time.setHours(timeArr[0]);
         time.setMinutes(timeArr[1]);
         time.setSeconds(0);
         time.setMilliseconds(0);
         return time;
-    }
-    
-    static padPeriodWithZero(time){//1:00-2:00 => 01:00-02:00
-        Logger.Log('padPeriodWithZero', time);
-        let timeArr = time.split('-');
-        return this.padTimeWithZero(timeArr[0]) + '-' + this.padTimeWithZero(timeArr[1]);
-    }
+    },
 
-    static padTimeWithZero(time){//1:00 => 01:00
-        Logger.Log('padTimeWithZero', time);
-        let timeArr = time.split(':');
-        let h = timeArr[0];
-        let m = timeArr[1];
-        if(h.length === 1){
+    padPeriodWithZero: function(time) { // 1:00-2:00 => 01:00-02:00
+        var timeArr = time.split('-');
+        return this.padTimeWithZero(timeArr[0]) + '-' + this.padTimeWithZero(timeArr[1]);
+    },
+
+    padTimeWithZero: function(time) { // 1:00 => 01:00
+        var timeArr = time.split(':');
+        var h = timeArr[0];
+        var m = timeArr[1];
+        if (h.length === 1) {
             h = '0' + h;
         }
-        if(m.length === 1){
+        if (m.length === 1) {
             m = '0' + m;
         }
         return h + ':' + m;
-    }
+    },
 
-    static timePeriodToFromToJson(timePeriod){
-        let timeArr = timePeriod.split('-');
-        let from = timeArr[0];
-        let to = timeArr[1];
+    timePeriodToFromToJson: function(timePeriod) {
+        var timeArr = timePeriod.split('-');
+        var from = timeArr[0];
+        var to = timeArr[1];
         return {
             from: from,
             to: to
         };
-    }
+    },
 
-    static timeToKey(time){
+    timeToKey: function(time) {
         return this.padTimeWithZero(time.getHours() + ':' + time.getMinutes());
-    }   
-}
+    }
+};
 
-class JsonFirstCollection {
-    static items = [];
-    static orderedKeys = [];
-    static warnKeys = [];
+var JsonFirstCollection = {
+    items: [],
+    orderedKeys: [],
+    warnKeys: [],
 
-    static add(item){
-        if(this.overlapsToNextDay(item)){
+    add: function(item) {
+        if (this.overlapsToNextDay(item)) {
             this.splitToNextDay(item);
-        }
-        else{
+        } else {
             this.items.push(item);
-            let key = item.key;
+            var key = item.key;
             this.orderedKeys.push(key);
             this.orderedKeys.sort();
-            if(item.warnTime)
+            if (item.warnTime)
                 this.warnKeys.push(key);
             this.warnKeys.sort();
         }
-    }
+    },
 
-    static splitToNextDay(item){
+    splitToNextDay: function(item) {
         var ifrom = item.from;
         var ito = item.to;
         var key1 = TimeHelpers.timeToKey(ifrom) + '-23:59';
@@ -278,175 +267,169 @@ class JsonFirstCollection {
         
         this.add(period1);
         this.add(period2);
-    }
+    },
     
-    static overlapsToNextDay(item){
-        if(item.to < item.from){
+    overlapsToNextDay: function(item) {
+        if (item.to < item.from) {
             console.warn('overlapsToNextDay'.toUpperCase(), item);
             return true;
         }
         return false;
-    }
+    },
 
-    static processWarnings(){
-        for(let i = 0; i < this.warnKeys.length; i++){
-            let key = this.warnKeys[i];
-            let item = this.getItem(key);
+    processWarnings: function() {
+        for (var i = 0; i < this.warnKeys.length; i++) {
+            var key = this.warnKeys[i];
+            var item = this.getItem(key);
             this.splitToWarnings(key, item);
         }
-    }
+    },
 
-    static splitToWarnings(key, item) {
-        let currentPositionInOrderedKeys = this.orderedKeys.indexOf(key);
-        let previousKey = this.orderedKeys[currentPositionInOrderedKeys - 1];
+    splitToWarnings: function(key, item) {
+        var currentPositionInOrderedKeys = this.orderedKeys.indexOf(key);
+        var previousKey = this.orderedKeys[currentPositionInOrderedKeys - 1];
         this.cropFromItem(previousKey, key);
-    }
+    },
 
-    static cropFromItem(previousKey, key){
+    cropFromItem: function(previousKey, key) {
         var cropFrom = this.getItem(previousKey);
         var warnItem = this.getItem(key);
-        let warnTime = warnItem.warnTime;
+        var warnTime = warnItem.warnTime;
         this.updateToTime(previousKey, this.getWarnTime(cropFrom.to, warnTime));
 
         //add zoon
-        let zoonKey = cropFrom.to.getHours() + ':' + cropFrom.to.getMinutes() + '-' + warnItem.from.getHours() + ':' + warnItem.from.getMinutes();
+        var zoonKey = cropFrom.to.getHours() + ':' + cropFrom.to.getMinutes() + '-' + warnItem.from.getHours() + ':' + warnItem.from.getMinutes();
         var zoonPeriod = new JsonFirst(zoonKey, {
             name: 'Zoon: ' + warnItem.name,
             className: warnItem.className
         }, 'warning');
         this.add(zoonPeriod);
-    }
+    },
 
-    static updateToTime(key, time){
-        for(let i = 0; i < this.items.length; i++){
-            if(this.items[i].key === key){
+    updateToTime: function(key, time) {
+        for (var i = 0; i < this.items.length; i++) {
+            if (this.items[i].key === key) {
                 this.items[i].to = time;
                 return;
             }
         }
-    }
+    },
 
-    static getWarnTime(date, warnTime) {
-        let time = new Date(date.getTime())
-        let warnDateTime = TimeHelpers.toTime(warnTime);
-        let warnHours = warnDateTime.getHours();
-        let warnMinutes = warnDateTime.getMinutes();
+    getWarnTime: function(date, warnTime) {
+        var time = new Date(date.getTime());
+        var warnDateTime = TimeHelpers.toTime(warnTime);
+        var warnHours = warnDateTime.getHours();
+        var warnMinutes = warnDateTime.getMinutes();
         time.setHours(time.getHours() - warnHours);
         time.setMinutes(time.getMinutes() - warnMinutes);
         return time;
-    }
+    },
 
-    static getItem(key){
-        return this.items.filter(x => x.key === key)[0];
-    }
+    getItem: function(key) {
+        return this.items.filter(function(x) { return x.key === key; })[0];
+    },
 
-    static showPeriods(){
-        for(let i = 0; i < this.orderedKeys.length; i++){
-            let key = this.orderedKeys[i];
-            let item = this.getItem(key);
+    showPeriods: function() {
+        for (var i = 0; i < this.orderedKeys.length; i++) {
+            var key = this.orderedKeys[i];
+            var item = this.getItem(key);
             
         }
-    }
+    },
 
-    static getOrderedArray(asJsonOb = false){
-        let result = [];
-        let json = {};
-        for(let i = 0; i < this.orderedKeys.length; i++){
-            let key = this.orderedKeys[i];
-            let item = this.getItem(key);
+    getOrderedArray: function(asJsonOb) {
+        if (asJsonOb === undefined) asJsonOb = false;
+        var result = [];
+        var json = {};
+        for (var i = 0; i < this.orderedKeys.length; i++) {
+            var key = this.orderedKeys[i];
+            var item = this.getItem(key);
             result.push(item);
             json[item.getCalculatedKey()] = item.asJson();
         }
-        if(asJsonOb)
+        if (asJsonOb)
             return json;
         return result;
     }
+};
+
+function JsonFirst(key, ob, type) {
+    if (type === undefined) type = 'normal';
+    this.constructorObject = ob;
+    this.originalKey = key;
+    this.className = ob.className;
+    this.key = TimeHelpers.padPeriodWithZero(this.originalKey);
+    this.name = ob.name;
+    this.warnTime = ob.warnTime;
+
+    this.from = TimeHelpers.toTime(this.key.split('-')[0]);
+    this.to = TimeHelpers.toTime(this.key.split('-')[1]);
+    this.originalItem = true;
+    this.type = type;
+    this.calculatedKey = null;
 }
 
-class JsonFirst {       
-    constructorObject = { 
-        "7:00-9:00" : {
-            "name": "Morning",
-            "warnTime": "0:30",
-            "className": "good"
-        }
-    }
-    constructor(key, ob, type = 'normal'){
-        Logger.Log('JsonFirst', ob);
-        this.constructorObject = ob;
-        this.originalKey = key;
-        this.className = ob.className;
-        Logger.Log('originalKey', this.originalKey);
-        this.key = TimeHelpers.padPeriodWithZero(this.originalKey);
-        Logger.Log('key', this.key);
-        this.name = ob.name;
-        this.warnTime = ob.warnTime;
+JsonFirst.prototype.getCalculatedKey = function(forceRecalculate) {
+    if (forceRecalculate === undefined) forceRecalculate = false;
+    if (!this.calculatedKey || forceRecalculate)
+        this.calculatedKey = TimeHelpers.padPeriodWithZero(this.from.getHours() + ':' + this.from.getMinutes() + '-' + this.to.getHours() + ':' + this.to.getMinutes());
+    return this.calculatedKey;
+};
 
-        this.from = TimeHelpers.toTime(this.key.split('-')[0]);
-        this.to = TimeHelpers.toTime(this.key.split('-')[1]);
-        this.originalItem = true;
-        this.type = type;
-        this.calculatedKey = null;
-    }
+JsonFirst.prototype.asJson = function() {
+    return {
+        name: this.name,
+        from: this.from,
+        to: this.to,
+        type: this.type
+    };
+};
 
-    getCalculatedKey(forceRecalculate = false){
-        if(!this.calculatedKey || forceRecalculate)
-            this.calculatedKey = TimeHelpers.padPeriodWithZero(this.from.getHours() + ':' + this.from.getMinutes() + '-' + this.to.getHours() + ':' + this.to.getMinutes());
-        return this.calculatedKey;
-    }
+var PeriodsOverlay = {
+    overlayClosedWidth: '100px',
+    overlayOpenedWidth: '400px',
+    overlayInnerContent: null,
+    defaultOpen: true,
+    overlay: null,
 
-    asJson(){
-        return {
-            name: this.name,
-            from: this.from,
-            to: this.to,
-            type: this.type
-        }
-    }
-}
-
-class PeriodsOverlay {
-    static overlayClosedWidth = '100px';
-    static overlayOpenedWidth = '400px';
-    static overlayInnerContent;
-    static defaultOpen = true;
-    static overlay;
-    static addOverlay(data){
+    addOverlay: function(data) {
+        var self = this;
         this.overlay = document.createElement('div');
         this.overlay.id = 'overlay';
-        this.overlay.onclick = () => {
-            this.toggleOverlay(this.overlay.style.width !== this.overlayOpenedWidth);
+        this.overlay.onclick = function() {
+            self.toggleOverlay(self.overlay.style.width !== self.overlayOpenedWidth);
         };
         this.overlay.classList.add('overlay');
         document.body.appendChild(this.overlay);
         this.fillContent(data, this.overlay);
         
         this.toggleOverlay(this.defaultOpen);
-    }
+    },
 
-    static toggleOverlay(open){
-        if(open) {
+    toggleOverlay: function(open) {
+        if (open) {
             this.overlay.style.width = this.overlayOpenedWidth;
             this.overlayInnerContent.style.display = 'block';
-        }
-        else {
+        } else {
             this.overlay.style.width = this.overlayClosedWidth;
             this.overlayInnerContent.style.display = 'none';
         }
-    }
-    static fillContent(data, parent){
+    },
+
+    fillContent: function(data, parent) {
         this.overlayInnerContent = document.createElement('div');
         this.processInnerContentData(data);
         parent.appendChild(this.overlayInnerContent);
-    }
-    static processInnerContentData(data){
-        for(let i = 0; i < data.length; i++){
-            let key = data[i].getCalculatedKey();
-            let div = document.createElement('div');
-            let timeDiv = document.createElement('span');
+    },
+
+    processInnerContentData: function(data) {
+        for (var i = 0; i < data.length; i++) {
+            var key = data[i].getCalculatedKey();
+            var div = document.createElement('div');
+            var timeDiv = document.createElement('span');
             timeDiv.classList.add('overlay-item-time');
             timeDiv.innerHTML = key;
-            let nameDiv = document.createElement('span');
+            var nameDiv = document.createElement('span');
             nameDiv.classList.add('overlay-item-name');
             nameDiv.innerHTML = data[i].name;
             div.id = 'overlay-item-' + key;
@@ -456,29 +439,29 @@ class PeriodsOverlay {
             div.classList.add('overlay-item');
             this.overlayInnerContent.appendChild(div);
         }
-    }
-    static setSelectedItem(key){
+    },
+
+    setSelectedItem: function(key) {
         key = 'overlay-item-' + key;
-        let items = document.getElementsByClassName('overlay-item');
-        for(let i = 0; i < items.length; i++){
+        var items = document.getElementsByClassName('overlay-item');
+        for (var i = 0; i < items.length; i++) {
             items[i].classList.remove('overlay-item-selected');
         }
-        let item = document.getElementById(key);
-        if(item){
+        var item = document.getElementById(key);
+        if (item) {
             item.classList.add('overlay-item-selected');
         }
     }
-}
-
+};
 
 // default warnClass, activeClass, idleClass
 var idleState = {
-        "name": "normal-idle"
+    "name": "normal-idle"
 };
 // var CLOCK = new DayPeriod('test', 5, '05:00');
 var CLOCK = new DayPeriod('test');
 
-let STATES = {
+var STATES = {
     "7:00-9:00" : {
         "name": "Morning",
         "warnTime": "0:30",
@@ -509,24 +492,21 @@ let STATES = {
         "warnTime": "0:30",
         "className": "bad"
     }
-}
+};
 
-function normalizePeriods(){
-    Logger.Log('STATES', STATES);
+function normalizePeriods() {
     first(STATES);
 }
-setTimeout(() => {    
+setTimeout(function() {    
     normalizePeriods();
 }, 1);
 
-function first(states){
-    let keys = Object.keys(states);
-    Logger.Log('first:keys', keys);
+function first(states) {
+    var keys = Object.keys(states);
     keys.sort();
-    let newShortColorStates = {};
-    for(let i = 0; i < keys.length; i++){
-        Logger.Log('first:states[keys[i]', states[keys[i]]);
-        let n = new JsonFirst(keys[i], states[keys[i]]);
+    var newShortColorStates = {};
+    for (var i = 0; i < keys.length; i++) {
+        var n = new JsonFirst(keys[i], states[keys[i]]);
         JsonFirstCollection.add(n);
     }    
     JsonFirstCollection.processWarnings();
@@ -541,7 +521,7 @@ function first(states){
     startClock();
 }
 
-function addOverlay(){
+function addOverlay() {
 
 }
 
@@ -552,49 +532,48 @@ function getClockEl() {
     return document.getElementById("clock");
 }
 
-let ACTIVESTATE = null;
-let ACTIVESTATE_Class = null;
-function inState(time, state){
-    if(time >= state.from && time <= state.to){
+var ACTIVESTATE = null;
+var ACTIVESTATE_Class = null;
+function inState(time, state) {
+    if (time >= state.from && time <= state.to) {
         return true;
     }
     return false;
 }
-function showState(state){
+function showState(state) {
     // console.log('ACTIVESTATE', ACTIVESTATE);
     // console.log('showState', state.getCalculatedKey());
-    if(ACTIVESTATE === state.getCalculatedKey()){
+    if (ACTIVESTATE === state.getCalculatedKey()) {
         return;
     }
     ACTIVESTATE = state.getCalculatedKey();
     PeriodsOverlay.setSelectedItem(ACTIVESTATE);
     console.log(state.type, state.getCalculatedKey());
-    let clock = getClockEl();
-    let warn = getWarnEl();
-    if(state.type === 'warning'){
+    var clock = getClockEl();
+    var warn = getWarnEl();
+    if (state.type === 'warning') {
         warn.innerHTML = state.name;
         warn.classList.remove(ACTIVESTATE_Class); 
-        ACTIVESTATE_Class = state.className ?? 'warning';
+        ACTIVESTATE_Class = state.className || 'warning';
         warn.classList.add(ACTIVESTATE_Class);   
         warn.classList.add("blinking-text");
-        setTimeout(() => {
+        setTimeout(function() {
+            warn.classList.remove("blinking-text");            
+        }, 3000);
+    } else {
+        warn.innerHTML = state.name;
+        warn.classList.remove(ACTIVESTATE_Class); 
+        ACTIVESTATE_Class = state.className || 'active';
+        warn.classList.add(ACTIVESTATE_Class);   
+        warn.classList.add("blinking-text");
+        setTimeout(function() {
             warn.classList.remove("blinking-text");            
         }, 3000);
     }
-    else{
-        warn.innerHTML = state.name;
-        warn.classList.remove(ACTIVESTATE_Class); 
-        ACTIVESTATE_Class = state.className ?? 'active';
-        warn.classList.add(ACTIVESTATE_Class);   
-        warn.classList.add("blinking-text");
-        setTimeout(() => {
-            warn.classList.remove("blinking-text");            
-        }, 3000);
-    }
-    if(ACTIVESTATE_Class === 'bad'){
+    if (ACTIVESTATE_Class === 'bad') {
         document.body.classList.add("blinking-text");
         document.body.classList.add("bad");
-        setTimeout(() => {
+        setTimeout(function() {
             document.body.classList.remove("blinking-text");         
             document.body.classList.remove("bad");   
         }, 3000);
@@ -602,10 +581,10 @@ function showState(state){
 }
 
 function processStates(time) {
-    let ss = JsonFirstCollection.getOrderedArray();
-    let keys = Object.keys(ss);
-    for (let i = 0; i < keys.length; i++) {
-        if(inState(time, ss[keys[i]])){
+    var ss = JsonFirstCollection.getOrderedArray();
+    var keys = Object.keys(ss);
+    for (var i = 0; i < keys.length; i++) {
+        if (inState(time, ss[keys[i]])) {
             showState(ss[keys[i]]);
             break;
         }        
@@ -613,28 +592,24 @@ function processStates(time) {
 }
 
 function startInterval() {
-    setInterval(function(){
-        let time = new Date().addHours(5.5);
+    setInterval(function() {
+        var time = new Date().addHours(5.5);
         showTime(CLOCK.getTime());
     }, 1);        
 }
 
-function setTime(time){
-    
+function setTime(time) {
     // console.log(time);
-    if(!time)
+    if (!time)
         time = new Date();
-    let useAmPm = false;
-    let showSeconds = false;
-    let hour =
-        time.getHours();
-    let min =
-        time.getMinutes();
-    let sec =
-        time.getSeconds();
-    am_pm = "AM";
+    var useAmPm = false;
+    var showSeconds = false;
+    var hour = time.getHours();
+    var min = time.getMinutes();
+    var sec = time.getSeconds();
+    var am_pm = "AM";
 
-    if(useAmPm){
+    if (useAmPm) {
         if (hour >= 12) {
             if (hour > 12)
                 hour -= 12;
@@ -643,40 +618,22 @@ function setTime(time){
             hr = 12;
             am_pm = "AM";
         }
-    }
-    else
+    } else {
         am_pm = "";
+    }
 
-    hour =
-        hour < 10
-            ? "0" + hour
-            : hour;
-    min =
-        min < 10
-            ? "0" + min
-            : min;
-    sec =
-        sec < 10
-            ? "0" + sec
-            : sec;
+    hour = hour < 10 ? "0" + hour : hour;
+    min = min < 10 ? "0" + min : min;
+    sec = sec < 10 ? "0" + sec : sec;
 
-    let secText = ":" + sec;
-    if(!showSeconds){
+    var secText = ":" + sec;
+    if (!showSeconds) {
         secText = "";
     }
 
-    let currentTime =
-        hour +
-        ":" +
-        min +
-        secText +
-        " " +
-        am_pm;
+    var currentTime = hour + ":" + min + secText + " " + am_pm;
 
-    document.getElementById(
-        "clock"
-    ).innerHTML =
-        currentTime;
+    document.getElementById("clock").innerHTML = currentTime;
 }
 function showTime(time) {
     setTime(time);
